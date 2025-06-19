@@ -44,6 +44,11 @@
             android:name=".MusicService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
+
+        <service
+            android:name=".BackgroundService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

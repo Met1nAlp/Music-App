@@ -92,6 +92,9 @@ class MainActivity : AppCompatActivity()
             }
         }
 
+        val serviceIntent = Intent(this, BackgroundService::class.java)
+        startService(serviceIntent)
+
         selectId = intent.getIntExtra("id", -1).takeIf { it != -1 }.toString()
         println("Seçilen ID: $selectId")
 

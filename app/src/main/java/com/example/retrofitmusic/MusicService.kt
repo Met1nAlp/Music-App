@@ -19,7 +19,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
+import kotlin.concurrent.thread
 
 
 class MusicService : Service()
@@ -33,7 +33,7 @@ class MusicService : Service()
     companion object
     {
         const val CHANNEL_ID = "MusicServiceChannel"
-        const val NOTIFICATION_ID = 1
+        const val NOTIFICATION_ID = 0
 
         // Service Actions
         const val ACTION_START = "com.example.retrofitmusic.START"
@@ -67,7 +67,8 @@ class MusicService : Service()
     {
         when (intent?.action)
         {
-            ACTION_START -> {
+            ACTION_START ->
+            {
                 val newTrackList = intent.getSerializableExtra(EXTRA_TRACK_LIST) as? List<Veriler>
                 val startIndex = intent.getIntExtra(EXTRA_TRACK_INDEX, 0)
 
@@ -83,6 +84,7 @@ class MusicService : Service()
             ACTION_PREVIOUS -> previousTrack()
             ACTION_STOP -> stopService()
         }
+
         return START_STICKY
     }
 
@@ -117,7 +119,9 @@ class MusicService : Service()
                     stopService()
                     true
                 }
-            } catch (e: Exception) {
+            }
+            catch (e: Exception)
+            {
                 Log.e("MusicService", "Error starting music: ${e.message}", e)
                 Toast.makeText(applicationContext, "Müzik başlatılırken genel bir hata oluştu.", Toast.LENGTH_SHORT).show()
                 stopService()
