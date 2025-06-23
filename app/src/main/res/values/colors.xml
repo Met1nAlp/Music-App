@@ -8,4 +8,5 @@
     <color name="text_primary">#FFFFFF</color> <!-- Beyaz metin -->
     <color name="text_secondary">#B0BEC5</color> <!-- Açık gri metin -->
     <color name="accent_color">#FF6F61</color>
+    <color name="favorite_color">#FF1200</color>
 </resources>

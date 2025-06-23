@@ -2,9 +2,11 @@ package com.example.retrofitmusic
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.retrofitmusic.ListAdapter
 import com.example.retrofitmusic.databinding.ActivitySarkiListeBinding
@@ -27,6 +29,13 @@ class SarkiListe : AppCompatActivity()
         binding = ActivitySarkiListeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
+
+
+
+
+
+
         postService = ApiClient.getClient().create(DeezerApiService::class.java)
 
         // BURADA EKLENMELİ
@@ -38,42 +47,78 @@ class SarkiListe : AppCompatActivity()
         setupAdapter()
     }
 
-    private fun setupAdapter()
+    private fun setupSearchView()
     {
-        println("ayse1")
-        binding.recyclerView.apply {
-            println("ayse2")
-            layoutManager = LinearLayoutManager(this@SarkiListe)
-            adapter = this@SarkiListe.adapter
-        }
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean = false
+            override fun onQueryTextChange(newText: String?): Boolean {
+                val filteredList = postList.filter { it.title.contains(newText ?: "", ignoreCase = true) }
+                adapter.updateList(filteredList) // Hata düzeltildi: list -> updateList
+                binding.emptyView.visibility = if (filteredList.isEmpty()) View.VISIBLE else View.GONE
+                return true
+            }
+        })
     }
 
     private fun setData()
     {
-        println("ali1")
+        binding.shimmerLayout.visibility = View.VISIBLE
+        binding.recyclerView.visibility = View.GONE
+        val call = postService.listPost("302127")
+        call.enqueue(object : Callback<DeezerResponse> {
+            override fun onResponse(call: Call<DeezerResponse>, response: Response<DeezerResponse>) {
+                binding.shimmerLayout.visibility = View.GONE
+                binding.recyclerView.visibility = View.VISIBLE
+                if (response.isSuccessful) {
+                    response.body()?.data?.let { tracks ->
+                        postList.clear()
+                        postList.addAll(tracks)
+                        adapter.notifyDataSetChanged()
+                        binding.emptyView.visibility = if (tracks.isEmpty()) View.VISIBLE else View.GONE
+                    } ?: run {
+                        Toast.makeText(this@SarkiListe, "Veri alınamadı", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    Toast.makeText(this@SarkiListe, "Hata: ${response.message()}", Toast.LENGTH_LONG).show()
+                }
+            }
+            override fun onFailure(call: Call<DeezerResponse>, t: Throwable) {
+                binding.shimmerLayout.visibility = View.GONE
+                binding.recyclerView.visibility = View.VISIBLE
+                Toast.makeText(this@SarkiListe, "Ağ hatası: ${t.message}", Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
+    private fun setupAdapter()
+    {
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(this@SarkiListe)
+            adapter = this@SarkiListe.adapter
+        }
+    }
+/*
+    private fun setData()
+    {
         val call = postService.listPost("302127")
 
         call.enqueue(object : Callback<DeezerResponse>
         {
             override fun onResponse(call: Call<DeezerResponse>, response: Response<DeezerResponse>)
             {
-                println("ali2")
                 if (response.isSuccessful)
                 {
-                    println("ali3")
                     response.body()?.data?.let { tracks ->
                         postList.clear()
                         postList.addAll(tracks)
                         adapter.notifyDataSetChanged()
 
-                        println("ali4")
                     } ?: run {
                         Toast.makeText(this@SarkiListe, "Veri alınamadı", Toast.LENGTH_LONG).show()
                     }
                 }
                 else
                 {
-                    println("lkadf")
                     Toast.makeText(this@SarkiListe, "Hata: ${response.message()}", Toast.LENGTH_LONG).show()
                 }
             }
@@ -84,4 +129,6 @@ class SarkiListe : AppCompatActivity()
             }
         })
     }
+
+ */
 }

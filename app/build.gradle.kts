@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+
 }
 
 android {
@@ -40,6 +41,10 @@ android {
 }
 
 dependencies {
+
+    implementation("io.insert-koin:koin-core:3.5.6")
+
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 
     implementation("androidx.media:media:1.7.0") // Medya bildirimleri için
     implementation("com.github.bumptech.glide:glide:4.16.0") // Resim yükleme için

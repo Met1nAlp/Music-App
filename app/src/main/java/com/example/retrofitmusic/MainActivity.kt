@@ -9,6 +9,8 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.animation.AnimationUtils
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,16 +18,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.example.retrofitmusic.databinding.ActivityMainBinding
+import org.koin.core.qualifier.named
+import org.koin.dsl.module
+import org.koin.java.KoinJavaComponent.inject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.Serializable // Serializable'ı açıkça import et
+import java.io.Serializable
+
+
 
 class MainActivity : AppCompatActivity()
 {
     private lateinit var binding: ActivityMainBinding
     private lateinit var postService: DeezerApiService
     private var postList: MutableList<Veriler> = mutableListOf()
+    private lateinit var rotateAnimation : android.view.animation.Animation
     private var selectId : String? = null
     private var sayac = 0
     private var isPlaying = false
@@ -69,10 +77,19 @@ class MainActivity : AppCompatActivity()
                     val progress = intent.getIntExtra(MusicService.EXTRA_PROGRESS, 0)
                     val duration = intent.getIntExtra(MusicService.EXTRA_DURATION, 0)
 
-                    binding.progressBar.max = duration
-                    binding.progressBar.progress = progress
+                    binding.seekBar.max = duration
+                    binding.seekBar.progress = progress
+
+                    binding.currentTimeTextView.text = formatTime(progress)
+                    binding.totalTimeTextView.text = formatTime(duration)
                 }
             }
+        }
+
+        private fun formatTime(millis: Int): String {
+            val minutes = (millis / 1000) / 60
+            val seconds = (millis / 1000) % 60
+            return String.format("%d:%02d", minutes, seconds)
         }
     }
 
@@ -84,6 +101,9 @@ class MainActivity : AppCompatActivity()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        rotateAnimation = AnimationUtils.loadAnimation(this@MainActivity , R.anim.rotate)
+        binding.gorselImageView.startAnimation(rotateAnimation)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
         {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
@@ -91,6 +111,26 @@ class MainActivity : AppCompatActivity()
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+
+        binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    val intent = Intent(this@MainActivity, MusicService::class.java)
+                    intent.action = "com.example.retrofitmusic.SEEK"
+                    intent.putExtra("position", progress)
+                    ContextCompat.startForegroundService(this@MainActivity, intent)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                // Kullanıcı SeekBar'a dokunmaya başladığında yapılacak işlemler
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                // Kullanıcı SeekBar'dan elini çektiğinde yapılacak işlemler
+            }
+        })
+
 
         val serviceIntent = Intent(this, BackgroundService::class.java)
         startService(serviceIntent)
@@ -108,10 +148,12 @@ class MainActivity : AppCompatActivity()
     private fun setupClickListeners()
     {
         binding.ileributonuImageView.setOnClickListener {
+            binding.gorselImageView.startAnimation(rotateAnimation)
             sendControlToService(MusicService.ACTION_NEXT)
         }
 
         binding.geributonuImageView.setOnClickListener {
+            binding.gorselImageView.startAnimation(rotateAnimation)
             sendControlToService(MusicService.ACTION_PREVIOUS)
         }
 
@@ -119,10 +161,12 @@ class MainActivity : AppCompatActivity()
 
             if (isPlaying)
             {
+                binding.gorselImageView.clearAnimation()
                 sendControlToService(MusicService.ACTION_PAUSE)
             }
             else
             {
+                binding.gorselImageView.startAnimation(rotateAnimation)
                 sendControlToService(MusicService.ACTION_PLAY)
             }
         }
@@ -220,7 +264,7 @@ class MainActivity : AppCompatActivity()
     {
         binding.baslikTextView.text = track.title
 
-        binding.progressBar.max = track.duration * 1000
+        binding.seekBar.max = track.duration * 1000
 
         if (isPlaying)
         {

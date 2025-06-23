@@ -34,8 +34,7 @@ class BackgroundService : Service()
             {
                 try
                 {
-                    Thread.sleep(1000)
-                    println("Service çalışıyor")
+                    Thread.sleep(100000)
 
                     sendNotificaiton()
                 }

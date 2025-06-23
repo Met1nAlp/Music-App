@@ -14,10 +14,12 @@ data class Veriler
     val duration: Int = 0,
     @SerializedName("preview")
     val preview: String = "",
-    @SerializedName("cover_medium") // Bu alan tekrar Veriler sınıfına eklendi!
+    @SerializedName("cover_medium")
     val cover_medium: String = "",
     @SerializedName("artist")
-    val artist: Artist // Artist data class'ı doğru yerde kaldı
+    val artist: Artist ,
+
+    var isFavorite: Boolean = false
 ) : Serializable
 
 data class Artist

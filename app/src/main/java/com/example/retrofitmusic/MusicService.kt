@@ -10,9 +10,12 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.core.app.NotificationCompat
 import com.bumptech.glide.Glide
+import com.example.retrofitmusic.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -67,6 +70,13 @@ class MusicService : Service()
     {
         when (intent?.action)
         {
+
+            "com.example.retrofitmusic.SEEK" ->
+            {
+                val position = intent.getIntExtra("position", 0)
+                mediaPlayer?.seekTo(position)
+            }
+
             ACTION_START ->
             {
                 val newTrackList = intent.getSerializableExtra(EXTRA_TRACK_LIST) as? List<Veriler>
@@ -131,7 +141,9 @@ class MusicService : Service()
 
     private fun playMusic()
     {
-        if (isPaused) {
+        if (isPaused)
+        {
+
             mediaPlayer?.start()
             isPaused = false
             updateNotification()
