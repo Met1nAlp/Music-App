@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.view.animation.AnimationUtils
@@ -93,6 +94,16 @@ class MainActivity : AppCompatActivity()
         }
     }
 
+    private fun saveVolume(context: Context, volume: Int) {
+        val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit().putInt("lastVolume", volume).apply()
+    }
+
+    private fun getVolume(context: Context, defaultValue: Int): Int {
+        val sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getInt("lastVolume", defaultValue)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
 
@@ -113,7 +124,8 @@ class MainActivity : AppCompatActivity()
         }
 
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
+            {
                 if (fromUser) {
                     val intent = Intent(this@MainActivity, MusicService::class.java)
                     intent.action = "com.example.retrofitmusic.SEEK"
@@ -129,6 +141,40 @@ class MainActivity : AppCompatActivity()
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 // Kullanıcı SeekBar'dan elini çektiğinde yapılacak işlemler
             }
+        })
+
+
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        binding.volumeSeekBar.max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        binding.volumeSeekBar.progress = getVolume(this, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
+
+
+        binding.volumeSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener
+        {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
+            {
+                if (fromUser)
+                {
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
+                    saveVolume(this@MainActivity, progress)
+                    val percentage = (progress * 100) / seekBar?.max!!
+                    binding.volumetextView.text = "Ses: %$percentage"
+                    binding.volumeSeekBar.contentDescription = "Ses düzeyi ayarlama, şu anki seviye %$percentage"
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?)
+            {
+                val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                {
+                    vibrator.vibrate(android.os.VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                }
+                else
+                {
+                    vibrator.vibrate(50)
+                }
+            }
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
 
