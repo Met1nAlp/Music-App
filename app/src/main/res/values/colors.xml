@@ -21,4 +21,6 @@
     <color name="colorAccent">#FFC107</color>
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#B0BEC5</color>
+
+    <color name="my_custom_green">#4CAF50</color>
 </resources>

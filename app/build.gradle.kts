@@ -47,8 +47,10 @@ dependencies {
 
     implementation("com.facebook.shimmer:shimmer:0.5.0")
 
+
     implementation("androidx.media:media:1.7.0") // Medya bildirimleri için
-    implementation("com.github.bumptech.glide:glide:4.16.0") // Resim yükleme için
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.play.services.maps) // Resim yükleme için
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0") // Glide Annotation İşleyicisi
 
     implementation("com.github.bumptech.glide:glide:4.16.0")

@@ -10,31 +10,27 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import android.view.animation.AnimationUtils
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.core.app.NotificationCompat
 import com.bumptech.glide.Glide
-import com.example.retrofitmusic.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.concurrent.thread
 
-
-class MusicService : Service()
-{
+class MusicService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     private var trackList: List<Veriler> = listOf()
+    private var originalTrackList: List<Veriler> = listOf() // Orijinal listeyi saklamak için
+    private var currentRepeatMode: RepeatMode = RepeatMode.OFF
     private var currentTrackIndex = 0
     private var isPaused = false
+    private var isShuffled = false // Karıştırma durumunu takip et
     private var progressJob: Job? = null
 
-    companion object
-    {
+    companion object {
         const val CHANNEL_ID = "MusicServiceChannel"
         const val NOTIFICATION_ID = 0
 
@@ -45,6 +41,8 @@ class MusicService : Service()
         const val ACTION_NEXT = "com.example.retrofitmusic.NEXT"
         const val ACTION_PREVIOUS = "com.example.retrofitmusic.PREVIOUS"
         const val ACTION_STOP = "com.example.retrofitmusic.STOP"
+        const val ACTION_REPEAT = "com.example.retrofitmusic.REPEAT"
+        const val ACTION_TOGGLE_SHUFFLE = "com.example.retrofitmusic.TOGGLE_SHUFFLE"
 
         // Broadcast Actions
         const val BROADCAST_TRACK_CHANGED = "com.example.retrofitmusic.TRACK_CHANGED"
@@ -58,35 +56,48 @@ class MusicService : Service()
         const val EXTRA_IS_PLAYING = "is_playing"
         const val EXTRA_PROGRESS = "progress"
         const val EXTRA_DURATION = "duration"
+        const val EXTRA_SHUFFLE_STATE = "shuffle_state"
     }
 
-    override fun onCreate()
-    {
+    override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
-    {
-        when (intent?.action)
-        {
+    enum class RepeatMode {
+        OFF,
+        REPEAT_ONE
+    }
 
-            "com.example.retrofitmusic.SEEK" ->
-            {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            "com.example.retrofitmusic.SEEK" -> {
                 val position = intent.getIntExtra("position", 0)
                 mediaPlayer?.seekTo(position)
             }
-
-            ACTION_START ->
-            {
+            ACTION_START -> {
                 val newTrackList = intent.getSerializableExtra(EXTRA_TRACK_LIST) as? List<Veriler>
                 val startIndex = intent.getIntExtra(EXTRA_TRACK_INDEX, 0)
-
                 if (!newTrackList.isNullOrEmpty()) {
-                    trackList = newTrackList
+                    originalTrackList = newTrackList // Orijinal listeyi sakla
+                    trackList = newTrackList.toMutableList() // Kopya ile çalış
                     currentTrackIndex = startIndex
+                    if (isShuffled) {
+                        shuffleTrackList()
+                    }
                     startMusic()
                 }
+            }
+            ACTION_REPEAT -> {
+                val ali = intent.getStringExtra("repeatmode")
+                currentRepeatMode = RepeatMode.entries.find { it.name == ali } ?: RepeatMode.OFF
+                Log.d("MusicService", "Repeat Mode: $currentRepeatMode")
+                mediaPlayer?.isLooping = currentRepeatMode == RepeatMode.REPEAT_ONE
+                updateNotification()
+                sendTrackUpdateBroadcast()
+            }
+            ACTION_TOGGLE_SHUFFLE -> {
+                toggleShuffle()
             }
             ACTION_PLAY -> playMusic()
             ACTION_PAUSE -> pauseMusic()
@@ -94,14 +105,39 @@ class MusicService : Service()
             ACTION_PREVIOUS -> previousTrack()
             ACTION_STOP -> stopService()
         }
-
         return START_STICKY
     }
 
-    private fun startMusic()
-    {
-        if (trackList.isEmpty() || currentTrackIndex !in trackList.indices)
-        {
+    private fun toggleShuffle() {
+        isShuffled = !isShuffled
+        if (isShuffled) {
+            shuffleTrackList()
+        } else {
+            restoreOriginalTrackList()
+        }
+        updateNotification()
+        sendTrackUpdateBroadcast()
+    }
+
+    private fun shuffleTrackList() {
+        val currentTrack = trackList.getOrNull(currentTrackIndex) ?: return
+        val mutableTrackList = trackList.toMutableList()
+        mutableTrackList.removeAt(currentTrackIndex) // Mevcut şarkıyı koru
+        mutableTrackList.shuffle() // Geri kalanları karıştır
+        mutableTrackList.add(0, currentTrack) // Mevcut şarkıyı başa ekle
+        trackList = mutableTrackList
+        currentTrackIndex = 0 // Mevcut şarkı şimdi listenin başında
+    }
+
+    private fun restoreOriginalTrackList() {
+        val currentTrack = trackList.getOrNull(currentTrackIndex) ?: return
+        trackList = originalTrackList.toMutableList()
+        currentTrackIndex = trackList.indexOfFirst { it.id == currentTrack.id }
+        if (currentTrackIndex == -1) currentTrackIndex = 0
+    }
+
+    private fun startMusic() {
+        if (trackList.isEmpty() || currentTrackIndex !in trackList.indices) {
             Log.w("MusicService", "Track list empty or index out of bounds.")
             stopService()
             return
@@ -112,6 +148,7 @@ class MusicService : Service()
         mediaPlayer = MediaPlayer().apply {
             try {
                 setDataSource(track.preview)
+                isLooping = currentRepeatMode == RepeatMode.REPEAT_ONE
                 prepareAsync()
                 setOnPreparedListener {
                     start()
@@ -121,7 +158,13 @@ class MusicService : Service()
                     startProgressBarUpdates()
                 }
                 setOnCompletionListener {
-                    nextTrack()
+                    if (currentRepeatMode == RepeatMode.REPEAT_ONE) {
+                        seekTo(0)
+                        start()
+                        sendTrackUpdateBroadcast()
+                    } else {
+                        nextTrack()
+                    }
                 }
                 setOnErrorListener { mp, what, extra ->
                     Log.e("MusicService", "MediaPlayer error: what=$what, extra=$extra")
@@ -129,9 +172,7 @@ class MusicService : Service()
                     stopService()
                     true
                 }
-            }
-            catch (e: Exception)
-            {
+            } catch (e: Exception) {
                 Log.e("MusicService", "Error starting music: ${e.message}", e)
                 Toast.makeText(applicationContext, "Müzik başlatılırken genel bir hata oluştu.", Toast.LENGTH_SHORT).show()
                 stopService()
@@ -139,11 +180,8 @@ class MusicService : Service()
         }
     }
 
-    private fun playMusic()
-    {
-        if (isPaused)
-        {
-
+    private fun playMusic() {
+        if (isPaused) {
             mediaPlayer?.start()
             isPaused = false
             updateNotification()
@@ -152,8 +190,7 @@ class MusicService : Service()
         }
     }
 
-    private fun pauseMusic()
-    {
+    private fun pauseMusic() {
         if (mediaPlayer?.isPlaying == true) {
             mediaPlayer?.pause()
             isPaused = true
@@ -163,26 +200,21 @@ class MusicService : Service()
         }
     }
 
-    private fun nextTrack()
-    {
-        if (trackList.isNotEmpty())
-        {
+    private fun nextTrack() {
+        if (trackList.isNotEmpty()) {
             currentTrackIndex = (currentTrackIndex + 1) % trackList.size
             startMusic()
         }
     }
 
-    private fun previousTrack()
-    {
-        if (trackList.isNotEmpty())
-        {
+    private fun previousTrack() {
+        if (trackList.isNotEmpty()) {
             currentTrackIndex = if (currentTrackIndex > 0) currentTrackIndex - 1 else trackList.size - 1
             startMusic()
         }
     }
 
-    private fun stopService()
-    {
+    private fun stopService() {
         mediaPlayer?.release()
         mediaPlayer = null
         progressJob?.cancel()
@@ -190,40 +222,33 @@ class MusicService : Service()
         stopSelf()
     }
 
-    private fun startProgressBarUpdates()
-    {
+    private fun startProgressBarUpdates() {
         progressJob?.cancel()
         progressJob = CoroutineScope(Dispatchers.Main).launch {
-
-            while (mediaPlayer?.isPlaying == true)
-            {
+            while (mediaPlayer?.isPlaying == true) {
                 val intent = Intent(BROADCAST_PROGRESS_UPDATE).apply {
-
                     putExtra(EXTRA_PROGRESS, mediaPlayer?.currentPosition ?: 0)
                     putExtra(EXTRA_DURATION, mediaPlayer?.duration ?: 0)
                 }
-
                 sendBroadcast(intent)
                 delay(1000)
             }
         }
     }
 
-    private fun sendTrackUpdateBroadcast()
-    {
+    private fun sendTrackUpdateBroadcast() {
         if (trackList.isEmpty() || currentTrackIndex !in trackList.indices) return
 
         val track = trackList[currentTrackIndex]
-
         val intent = Intent(BROADCAST_TRACK_CHANGED).apply {
             putExtra(EXTRA_CURRENT_TRACK, track)
             putExtra(EXTRA_IS_PLAYING, !isPaused)
+            putExtra(EXTRA_SHUFFLE_STATE, isShuffled)
         }
         sendBroadcast(intent)
     }
 
-    private fun createNotification(): Notification
-    {
+    private fun createNotification(): Notification {
         val currentTrack = trackList.getOrNull(currentTrackIndex) ?: return NotificationCompat.Builder(this, CHANNEL_ID).build()
 
         val openAppIntent = Intent(this, MainActivity::class.java).apply {
@@ -240,8 +265,6 @@ class MusicService : Service()
         val playPauseIcon = if (isPaused) R.drawable.devam_asset else R.drawable.durdur_asset
         val playPauseText = if (isPaused) "Oynat" else "Duraklat"
 
-
-
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(currentTrack.title)
             .setContentText(currentTrack.artist.name)
@@ -256,25 +279,20 @@ class MusicService : Service()
             .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
 
-
         CoroutineScope(Dispatchers.IO).launch {
-            try
-            {
+            try {
                 val bitmap = Glide.with(applicationContext)
                     .asBitmap()
                     .load(currentTrack.album.cover_medium)
                     .submit()
-                    .get() // Blocking call, bu yüzden IO dispatcher'da olmalı
-                withContext(Dispatchers.Main) { // UI güncellemeleri için Main dispatcher'a geç
+                    .get()
+                withContext(Dispatchers.Main) {
                     builder.setLargeIcon(bitmap)
                     val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                     notificationManager.notify(NOTIFICATION_ID, builder.build())
                 }
-            }
-            catch (e: Exception)
-            {
+            } catch (e: Exception) {
                 Log.e("MusicService", "Error loading large icon: ${e.message}", e)
-
             }
         }
 
@@ -303,7 +321,6 @@ class MusicService : Service()
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
-
         super.onDestroy()
         mediaPlayer?.release()
         mediaPlayer = null

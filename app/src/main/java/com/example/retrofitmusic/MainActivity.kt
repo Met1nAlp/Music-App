@@ -10,7 +10,12 @@ import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.MotionEvent
+import android.view.View
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -29,6 +34,7 @@ import java.io.Serializable
 
 
 
+
 class MainActivity : AppCompatActivity()
 {
     private lateinit var binding: ActivityMainBinding
@@ -37,7 +43,23 @@ class MainActivity : AppCompatActivity()
     private lateinit var rotateAnimation : android.view.animation.Animation
     private var selectId : String? = null
     private var sayac = 0
+    private var terkrarSayaci = 1
     private var isPlaying = false
+
+
+
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val HIDE_DELAY_MS = 3000L
+    private val hideRunnable = Runnable {
+
+        if (binding.kararsinLinearLayout.visibility == View.VISIBLE)
+        {
+            binding.kararsinLinearLayout.visibility = View.INVISIBLE
+            binding.ikincil.visibility = View.VISIBLE
+        }
+    }
+
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -113,7 +135,6 @@ class MainActivity : AppCompatActivity()
         setContentView(binding.root)
 
         rotateAnimation = AnimationUtils.loadAnimation(this@MainActivity , R.anim.rotate)
-        binding.gorselImageView.startAnimation(rotateAnimation)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
         {
@@ -176,6 +197,68 @@ class MainActivity : AppCompatActivity()
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
+        binding.SayfaGeriImageView.setOnClickListener {
+
+            val gerigit = Intent(this@MainActivity , SarkiListe::class.java)
+            startActivity(gerigit)
+
+        }
+
+        binding.tekrarOynatImageView.setOnClickListener {
+
+            val intent = Intent(this, MusicService::class.java)
+
+            val resim = resources.getDrawable(R.drawable.fulltekrar_asset)
+            val resim2 = resources.getDrawable(R.drawable.tekraroynat_asset)
+
+            if (terkrarSayaci == 0 )
+            {
+                binding.tekrarOynatImageView.setColorFilter(resources.getColor(R.color.white))
+                intent.action = MusicService.ACTION_REPEAT
+                intent.putExtra("repeatmode", MusicService.RepeatMode.REPEAT_ONE.toString())
+
+                terkrarSayaci = 1
+            }
+            else if (terkrarSayaci == 1 )
+            {
+                binding.tekrarOynatImageView.setColorFilter(resources.getColor(R.color.accent_color))
+                intent.action = MusicService.ACTION_REPEAT
+                intent.putExtra("repeatmode", MusicService.RepeatMode.OFF.name)
+                terkrarSayaci = 0
+            }
+            ContextCompat.startForegroundService(this , intent)
+        }
+
+        binding.karistirImageView.setOnClickListener {
+
+            binding.karistirImageView.setColorFilter(resources.getColor(R.color.accent_color))
+
+            val intent = Intent(this, MusicService::class.java)
+            intent.action = MusicService.ACTION_TOGGLE_SHUFFLE
+            startService(intent)
+            resetHideTimer()
+        }
+
+        binding.sesAyarlaImageView.setOnClickListener {
+
+            binding.ikincil.visibility = View.INVISIBLE
+            binding.kararsinLinearLayout.visibility = View.VISIBLE
+
+            resetHideTimer()
+        }
+
+        binding.main.setOnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                resetHideTimer()
+
+                if (binding.kararsinLinearLayout.visibility == View.VISIBLE)
+                {
+                    binding.kararsinLinearLayout.visibility = View.INVISIBLE
+                    binding.ikincil.visibility = View.VISIBLE
+                }
+            }
+            false
+        }
 
         val serviceIntent = Intent(this, BackgroundService::class.java)
         startService(serviceIntent)
@@ -193,12 +276,10 @@ class MainActivity : AppCompatActivity()
     private fun setupClickListeners()
     {
         binding.ileributonuImageView.setOnClickListener {
-            binding.gorselImageView.startAnimation(rotateAnimation)
             sendControlToService(MusicService.ACTION_NEXT)
         }
 
         binding.geributonuImageView.setOnClickListener {
-            binding.gorselImageView.startAnimation(rotateAnimation)
             sendControlToService(MusicService.ACTION_PREVIOUS)
         }
 
@@ -206,12 +287,10 @@ class MainActivity : AppCompatActivity()
 
             if (isPlaying)
             {
-                binding.gorselImageView.clearAnimation()
                 sendControlToService(MusicService.ACTION_PAUSE)
             }
             else
             {
-                binding.gorselImageView.startAnimation(rotateAnimation)
                 sendControlToService(MusicService.ACTION_PLAY)
             }
         }
@@ -286,13 +365,19 @@ class MainActivity : AppCompatActivity()
 
     private fun updateUI(track: Veriler)
     {
-        binding.baslikTextView.text = track.title
+        binding.sarkiIsmiTextView.text = track.title
+        binding.sanatciIsmiTextView.text = track.artist.name
 
         binding.seekBar.max = track.duration * 1000
 
         Glide.with(this@MainActivity)
             .load(track.album.cover_medium)
             .into(binding.gorselImageView)
+
+        Glide.with(this@MainActivity)
+            .load(track.album.cover_medium)
+            .into(binding.arkaplanGorselImageView)
+
 
 
         if (isPlaying)
@@ -325,6 +410,11 @@ class MainActivity : AppCompatActivity()
         {
             registerReceiver(serviceStateReceiver, intentFilter)
         }
+    }
+
+    private fun resetHideTimer() {
+        handler.removeCallbacks(hideRunnable)
+        handler.postDelayed(hideRunnable, HIDE_DELAY_MS)
     }
 
     override fun onStop()
