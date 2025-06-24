@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity()
                     // Güvenli type casting kullanıyoruz
                     val track = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                     {
-                        intent.getSerializableExtra(MusicService.EXTRA_CURRENT_TRACK, Veriler::class.java)
+                        intent.getParcelableExtra(MusicService.EXTRA_CURRENT_TRACK, Veriler::class.java)
                     }
                     else
                     {
@@ -158,7 +158,6 @@ class MainActivity : AppCompatActivity()
                     audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
                     saveVolume(this@MainActivity, progress)
                     val percentage = (progress * 100) / seekBar?.max!!
-                    binding.volumetextView.text = "Ses: %$percentage"
                     binding.volumeSeekBar.contentDescription = "Ses düzeyi ayarlama, şu anki seviye %$percentage"
                 }
             }
@@ -181,11 +180,11 @@ class MainActivity : AppCompatActivity()
         val serviceIntent = Intent(this, BackgroundService::class.java)
         startService(serviceIntent)
 
-        selectId = intent.getIntExtra("id", -1).takeIf { it != -1 }.toString()
+        selectId = intent.getLongExtra("id", -1).takeIf { it != (-1).toLong() }.toString()
         println("Seçilen ID: $selectId")
 
+
         postService = ApiClient.getClient().create(DeezerApiService::class.java)
-        fetchAlbumData()
         fetchTrackListAndStartService()
 
         setupClickListeners()
@@ -227,36 +226,12 @@ class MainActivity : AppCompatActivity()
         ContextCompat.startForegroundService(this, intent)
     }
 
-    private fun fetchAlbumData()
-    {
-        val albumCall = postService.getAlbum("302127")
-        albumCall.enqueue(object : Callback<AlbumResponse>
-        {
-            override fun onResponse(call: Call<AlbumResponse>, response: Response<AlbumResponse>)
-            {
 
-                if (response.isSuccessful)
-                {
-                    response.body()?.let { album ->
-                        Glide.with(this@MainActivity)
-                            .load(album.cover_medium)
-                            .into(binding.gorselImageView)
-                    }
-                }
-                else
-                {
-                    Toast.makeText(applicationContext, "Albüm verisi çekilirken hata: ${response.message()}", Toast.LENGTH_SHORT).show()
-                }
-            }
-            override fun onFailure(call: Call<AlbumResponse>, t: Throwable) {
-                Toast.makeText(applicationContext, "Albüm verisi çekilirken ağ hatası: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
 
     private fun fetchTrackListAndStartService()
     {
-        val call = postService.listPost("302127") // Hardcoded albüm ID'si
+        val call = postService.listPost() // Hardcoded albüm ID'si
+        var ali : Long ;
 
         call.enqueue(object : Callback<DeezerResponse>
         {
@@ -272,10 +247,13 @@ class MainActivity : AppCompatActivity()
 
                             sayac = selectId?.let { id ->
 
-                               val ali = id.toInt()
+                               ali = id.toLong()
 
                                 postList.indexOfFirst { it.id == ali  }.takeIf { it != -1 } ?: 0
+
+
                             } ?: 0
+
 
                             startMusicService()
                         }
@@ -311,6 +289,11 @@ class MainActivity : AppCompatActivity()
         binding.baslikTextView.text = track.title
 
         binding.seekBar.max = track.duration * 1000
+
+        Glide.with(this@MainActivity)
+            .load(track.album.cover_medium)
+            .into(binding.gorselImageView)
+
 
         if (isPlaying)
         {

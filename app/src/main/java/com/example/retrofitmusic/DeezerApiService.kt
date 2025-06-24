@@ -6,9 +6,10 @@ import retrofit2.http.Path
 
 interface DeezerApiService
 {
-    @GET("album/{id}/tracks")
-    fun listPost(@Path("id") id: String): Call<DeezerResponse>
+    @GET("chart/0/tracks")
+    fun listPost(): Call<DeezerResponse>
 
-    @GET("album/{id}")
-    fun getAlbum(@Path("id") id: String): Call<AlbumResponse>
+    @GET("chart/0/album")
+    fun getAlbum(): Call<AlbumResponse>
+
 }

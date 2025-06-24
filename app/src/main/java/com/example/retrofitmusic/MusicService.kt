@@ -241,6 +241,7 @@ class MusicService : Service()
         val playPauseText = if (isPaused) "Oynat" else "Duraklat"
 
 
+
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(currentTrack.title)
             .setContentText(currentTrack.artist.name)
@@ -261,7 +262,7 @@ class MusicService : Service()
             {
                 val bitmap = Glide.with(applicationContext)
                     .asBitmap()
-                    .load(currentTrack.cover_medium)
+                    .load(currentTrack.album.cover_medium)
                     .submit()
                     .get() // Blocking call, bu yüzden IO dispatcher'da olmalı
                 withContext(Dispatchers.Main) { // UI güncellemeleri için Main dispatcher'a geç

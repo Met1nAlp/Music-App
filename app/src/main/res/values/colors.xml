@@ -5,8 +5,20 @@
 
     <color name="background_dark">#1C2526</color> <!-- Koyu gri-mavi tema -->
     <color name="card_background">#2A363B</color> <!-- Satır arka planı -->
-    <color name="text_primary">#FFFFFF</color> <!-- Beyaz metin -->
-    <color name="text_secondary">#B0BEC5</color> <!-- Açık gri metin -->
-    <color name="accent_color">#FF6F61</color>
+    <color name="accent_color2">#FF6F61</color>
     <color name="favorite_color">#FF1200</color>
+
+    <color name="primary_color">#6200EE</color> <!-- Mor tonu -->
+    <color name="primary_light_color">#BB86FC</color>
+    <color name="accent_color">#03DAC5</color> <!-- Turkuaz -->
+    <color name="background_color">#F5F5F5</color> <!-- Açık gri -->
+    <color name="text_color">#212121</color> <!-- Koyu gri -->
+
+
+    <color name="colorPrimaryDark">#1A2833</color>
+    <color name="colorPrimary">#2C3E50</color>
+    <color name="colorCard">#3F5062</color>
+    <color name="colorAccent">#FFC107</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0BEC5</color>
 </resources>
