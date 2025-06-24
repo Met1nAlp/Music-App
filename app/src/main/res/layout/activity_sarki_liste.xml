@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    android:background="@color/background_dark"> <!-- Koyu tema -->
+    android:background="@drawable/background_gradient">
 
 
     <androidx.appcompat.widget.SearchView
@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="20dp"
+        android:background="@color/white"
         android:contentDescription="Şarkı ara"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
