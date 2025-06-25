@@ -10,9 +10,19 @@ data class DeezerResponse
 
 data class AlbumResponse
 (
-    @SerializedName("cover_medium")
-    val cover_medium: String,
     @SerializedName("id")
-    val id : Int
+    val id: Int,
+    @SerializedName("title")
+    val title: String,
+    @SerializedName("cover_medium")
+    val coverMedium: String,
+    @SerializedName("tracks")
+    val tracks: TracksWrapper
 
+)
+
+data class TracksWrapper
+(
+    @SerializedName("data")
+    val data: List<Veriler>
 )

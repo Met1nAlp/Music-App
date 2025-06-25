@@ -64,7 +64,8 @@ class ListAdapter(var list: List<Veriler>) : RecyclerView.Adapter<ListAdapter.Vi
             }
             root.setOnClickListener {
                 val intent = Intent(root.context, MainActivity::class.java)
-                intent.putExtra("id", secilen.id)
+                intent.putExtra("song_list", ArrayList(list))
+                intent.putExtra("song_index", position)
                 root.context.startActivity(intent)
             }
         }

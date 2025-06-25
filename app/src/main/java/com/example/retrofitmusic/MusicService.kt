@@ -59,18 +59,21 @@ class MusicService : Service() {
         const val EXTRA_SHUFFLE_STATE = "shuffle_state"
     }
 
-    override fun onCreate() {
+    override fun onCreate()
+    {
         super.onCreate()
         createNotificationChannel()
     }
 
-    enum class RepeatMode {
+    enum class RepeatMode
+    {
         OFF,
         REPEAT_ONE
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
+        when (intent?.action)
+        {
             "com.example.retrofitmusic.SEEK" -> {
                 val position = intent.getIntExtra("position", 0)
                 mediaPlayer?.seekTo(position)

@@ -79,37 +79,62 @@ class SarkiListe : AppCompatActivity()
     {
         binding.shimmerLayout.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
-        val call = postService.listPost()
-        call.enqueue(object : Callback<DeezerResponse> {
 
+        val callChart = postService.listPost()
+        callChart.enqueue(object : Callback<DeezerResponse>
+        {
             override fun onResponse(call: Call<DeezerResponse>, response: Response<DeezerResponse>)
             {
-                println("Veri alındı")
-                binding.shimmerLayout.visibility = View.GONE
-                binding.recyclerView.visibility = View.VISIBLE
-
                 if (response.isSuccessful)
                 {
-                    response.body()?.data?.let { tracks ->
+                    response.body()?.data?.let { chartTracks ->
                         postList.clear()
-                        postList.addAll(tracks)
-                        adapter.notifyDataSetChanged()
-                        binding.emptyView.visibility = if (tracks.isEmpty()) View.VISIBLE else View.GONE
-                    } ?: run {
-                        Toast.makeText(this@SarkiListe, "Veri alınamadı", Toast.LENGTH_LONG).show()
+                        postList.addAll(chartTracks)
                     }
                 }
                 else
                 {
-                    Toast.makeText(this@SarkiListe, "Hata: ${response.message()}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@SarkiListe, "Liste alınamadı: ${response.message()}", Toast.LENGTH_LONG).show()
                 }
+
+
+                val callAlbum = postService.getAlbum(302127)
+                callAlbum.enqueue(object : Callback<AlbumResponse>
+                {
+                    override fun onResponse(call: Call<AlbumResponse>, response: Response<AlbumResponse>)
+                    {
+                        binding.shimmerLayout.visibility = View.GONE
+                        binding.recyclerView.visibility = View.VISIBLE
+
+                        if (response.isSuccessful)
+                        {
+                            response.body()?.tracks?.data?.let { albumTracks ->
+                                postList.addAll(albumTracks)
+                                adapter.notifyDataSetChanged()
+                            }
+                        }
+                        else
+                        {
+                            Toast.makeText(this@SarkiListe, "Albüm alınamadı: ${response.message()}", Toast.LENGTH_LONG).show()
+                        }
+
+                        binding.emptyView.visibility = if (postList.isEmpty()) View.VISIBLE else View.GONE
+                    }
+
+                    override fun onFailure(call: Call<AlbumResponse>, t: Throwable)
+                    {
+                        binding.shimmerLayout.visibility = View.GONE
+                        binding.recyclerView.visibility = View.VISIBLE
+                        Toast.makeText(this@SarkiListe, "Ağ hatası (Albüm): ${t.message}", Toast.LENGTH_LONG).show()
+                    }
+                })
             }
+
             override fun onFailure(call: Call<DeezerResponse>, t: Throwable)
             {
-                println("Hata oluştu: ${t.message}")
                 binding.shimmerLayout.visibility = View.GONE
                 binding.recyclerView.visibility = View.VISIBLE
-                Toast.makeText(this@SarkiListe, "Ağ hatası: ${t.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@SarkiListe, "Ağ hatası (Liste): ${t.message}", Toast.LENGTH_LONG).show()
             }
         })
     }

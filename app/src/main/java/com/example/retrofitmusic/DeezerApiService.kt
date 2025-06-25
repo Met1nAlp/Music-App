@@ -9,7 +9,7 @@ interface DeezerApiService
     @GET("chart/0/tracks")
     fun listPost(): Call<DeezerResponse>
 
-    @GET("chart/0/album")
-    fun getAlbum(): Call<AlbumResponse>
+    @GET("album/{albumId}")
+    fun getAlbum(@Path("albumId") albumId: Int): Call<AlbumResponse>
 
 }

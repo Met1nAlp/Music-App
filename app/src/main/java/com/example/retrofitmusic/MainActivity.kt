@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.media.AudioManager
+import android.media.MediaParser
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -38,16 +39,11 @@ import java.io.Serializable
 class MainActivity : AppCompatActivity()
 {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var postService: DeezerApiService
     private var postList: MutableList<Veriler> = mutableListOf()
     private lateinit var rotateAnimation : android.view.animation.Animation
-    private var selectId : String? = null
     private var sayac = 0
     private var terkrarSayaci = 1
     private var isPlaying = false
-
-
-
 
     private val handler = Handler(Looper.getMainLooper())
     private val HIDE_DELAY_MS = 3000L
@@ -215,7 +211,7 @@ class MainActivity : AppCompatActivity()
             {
                 binding.tekrarOynatImageView.setColorFilter(resources.getColor(R.color.white))
                 intent.action = MusicService.ACTION_REPEAT
-                intent.putExtra("repeatmode", MusicService.RepeatMode.REPEAT_ONE.toString())
+                intent.putExtra("repeatmode", MusicService.RepeatMode.OFF.toString())
 
                 terkrarSayaci = 1
             }
@@ -223,7 +219,7 @@ class MainActivity : AppCompatActivity()
             {
                 binding.tekrarOynatImageView.setColorFilter(resources.getColor(R.color.accent_color))
                 intent.action = MusicService.ACTION_REPEAT
-                intent.putExtra("repeatmode", MusicService.RepeatMode.OFF.name)
+                intent.putExtra("repeatmode", MusicService.RepeatMode.REPEAT_ONE.name)
                 terkrarSayaci = 0
             }
             ContextCompat.startForegroundService(this , intent)
@@ -260,15 +256,33 @@ class MainActivity : AppCompatActivity()
             false
         }
 
-        val serviceIntent = Intent(this, BackgroundService::class.java)
+        var serviceIntent = Intent(this, BackgroundService::class.java)
         startService(serviceIntent)
 
-        selectId = intent.getLongExtra("id", -1).takeIf { it != (-1).toLong() }.toString()
-        println("Seçilen ID: $selectId")
+        val receivedList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        {
 
+            intent.getParcelableArrayListExtra("song_list", Veriler::class.java)
+        }
+        else
+        {
+            @Suppress("DEPRECATION")
+            intent.getSerializableExtra("song_list") as? ArrayList<Veriler>
+        }
 
-        postService = ApiClient.getClient().create(DeezerApiService::class.java)
-        fetchTrackListAndStartService()
+        sayac = intent.getIntExtra("song_index" , 0)
+
+        if (receivedList != null && receivedList.isNotEmpty() ) {
+            postList.clear()
+            postList.addAll(receivedList)
+            updateUI(postList[sayac])
+            startMusicService()
+        }
+        else
+        {
+            Toast.makeText(this, "Şarkı listesi alınamadı.", Toast.LENGTH_SHORT).show()
+            finish()
+        }
 
         setupClickListeners()
     }
@@ -306,10 +320,10 @@ class MainActivity : AppCompatActivity()
     }
 
 
-
+/*
     private fun fetchTrackListAndStartService()
     {
-        val call = postService.listPost() // Hardcoded albüm ID'si
+        val call = postService.listPost()
         var ali : Long ;
 
         call.enqueue(object : Callback<DeezerResponse>
@@ -324,9 +338,10 @@ class MainActivity : AppCompatActivity()
                             postList.clear()
                             postList.addAll(tracks)
 
-                            sayac = selectId?.let { id ->
+                            sayac = select?.id.let { id ->
 
-                               ali = id.toLong()
+                               ali = id!!.toLong()
+
 
                                 postList.indexOfFirst { it.id == ali  }.takeIf { it != -1 } ?: 0
 
@@ -352,14 +367,16 @@ class MainActivity : AppCompatActivity()
         })
     }
 
+ */
+
     private fun startMusicService()
     {
         val serviceIntent = Intent(this, MusicService::class.java).apply {
+
             action = MusicService.ACTION_START
-            putExtra(MusicService.EXTRA_TRACK_LIST, postList as Serializable)
+            putExtra(MusicService.EXTRA_TRACK_LIST, postList as java.io.Serializable)
             putExtra(MusicService.EXTRA_TRACK_INDEX, sayac)
         }
-
         ContextCompat.startForegroundService(this, serviceIntent)
     }
 
