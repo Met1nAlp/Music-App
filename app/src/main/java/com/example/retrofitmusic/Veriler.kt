@@ -20,6 +20,8 @@ data class Veriler
     val artist: Artist ,
     @SerializedName("album")
     val album: Album ,
+  //  @SerializedName("playlist")
+   // val playlist: PlayList? = null,
 
     var isFavorite: Boolean = false
 ) : Parcelable
@@ -46,3 +48,22 @@ data class Album
     @SerializedName("cover_medium")
     val cover_medium: String? = null
 ) : Parcelable
+/*
+@Parcelize
+data class PlayList(
+    @SerializedName("id") val id: Long = 0,
+    @SerializedName("title") val title: String = "",
+    @SerializedName("picture_medium") val pictureMedium: String? = null,
+    @SerializedName("creator") val creator: Creator? = null,
+    @SerializedName("nb_tracks") val nbTracks: Int = 0,
+    @SerializedName("link") val link: String? = null,
+    @SerializedName("creation_date") val creationDate: String? = null
+) : Parcelable
+
+@Parcelize
+data class Creator(
+    @SerializedName("id") val id: Int = 0,
+    @SerializedName("name") val name: String = ""
+) : Parcelable
+
+ */

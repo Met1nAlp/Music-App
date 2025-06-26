@@ -12,4 +12,9 @@ interface DeezerApiService
     @GET("album/{albumId}")
     fun getAlbum(@Path("albumId") albumId: Int): Call<AlbumResponse>
 
+    @GET("playlist/{playlistId}/tracks")
+    fun getPlaylistTracks(@Path("playlistId") playlistId: Long): Call<DeezerResponse>
+
+    @GET("playlist/{playlistId}")
+    fun getPlaylistDetails(@Path("playlistId") playlistId: Long): Call<Playlist>
 }

@@ -71,7 +71,8 @@ class ListAdapter(var list: List<Veriler>) : RecyclerView.Adapter<ListAdapter.Vi
         }
     }
 
-    fun updateList(newList: List<Veriler>) {
+    fun updateList(newList: List<Veriler>)
+    {
         list = newList
         notifyDataSetChanged()
     }

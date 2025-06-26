@@ -23,4 +23,7 @@
     <color name="text_secondary">#B0BEC5</color>
 
     <color name="my_custom_green">#4CAF50</color>
+
+    <color name="gradient_start">#1A1F29</color>
+    <color name="gradient_end">#0C0F14</color>
 </resources>

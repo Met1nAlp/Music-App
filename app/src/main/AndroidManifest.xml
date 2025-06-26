@@ -8,7 +8,6 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -19,32 +18,32 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RetrofitMusic"
         tools:targetApi="31">
-        <activity
-            android:name=".SarkiListe"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
-            android:name=".SarkiListe"
-            android:exported="true">
+            android:name=".AnaSayfa"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
 
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:launchMode="singleTop"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+
+        <activity
+            android:name=".SarkiListe"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+
 
         <service
             android:name=".MusicService"
-            android:exported="false"
+            android:exported="true"
             android:foregroundServiceType="mediaPlayback" />
 
         <service

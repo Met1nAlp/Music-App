@@ -1,5 +1,6 @@
 package com.example.retrofitmusic
 
+import android.R.attr.track
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -79,11 +80,18 @@ class MusicService : Service() {
                 mediaPlayer?.seekTo(position)
             }
             ACTION_START -> {
-                val newTrackList = intent.getSerializableExtra(EXTRA_TRACK_LIST) as? List<Veriler>
+                // Veriyi Parcelable olarak alın
+                val newTrackList: List<Veriler>? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableArrayListExtra(EXTRA_TRACK_LIST, Veriler::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableArrayListExtra(EXTRA_TRACK_LIST)
+                }
+
                 val startIndex = intent.getIntExtra(EXTRA_TRACK_INDEX, 0)
                 if (!newTrackList.isNullOrEmpty()) {
-                    originalTrackList = newTrackList // Orijinal listeyi sakla
-                    trackList = newTrackList.toMutableList() // Kopya ile çalış
+                    originalTrackList = newTrackList
+                    trackList = newTrackList.toMutableList()
                     currentTrackIndex = startIndex
                     if (isShuffled) {
                         shuffleTrackList()
@@ -110,6 +118,8 @@ class MusicService : Service() {
         }
         return START_STICKY
     }
+
+
 
     private fun toggleShuffle() {
         isShuffled = !isShuffled

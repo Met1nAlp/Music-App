@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.media.AudioManager
-import android.media.MediaParser
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -16,7 +15,6 @@ import android.os.Looper
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -25,13 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.example.retrofitmusic.databinding.ActivityMainBinding
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
-import org.koin.java.KoinJavaComponent.inject
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.io.Serializable
+
 
 
 
@@ -78,7 +70,6 @@ class MainActivity : AppCompatActivity()
             {
                 MusicService.BROADCAST_TRACK_CHANGED ->
                 {
-                    // Güvenli type casting kullanıyoruz
                     val track = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                     {
                         intent.getParcelableExtra(MusicService.EXTRA_CURRENT_TRACK, Veriler::class.java)
@@ -151,12 +142,12 @@ class MainActivity : AppCompatActivity()
                 }
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                // Kullanıcı SeekBar'a dokunmaya başladığında yapılacak işlemler
+            override fun onStartTrackingTouch(seekBar: SeekBar?)
+            {
             }
 
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                // Kullanıcı SeekBar'dan elini çektiğinde yapılacak işlemler
+            override fun onStopTrackingTouch(seekBar: SeekBar?)
+            {
             }
         })
 
@@ -193,12 +184,7 @@ class MainActivity : AppCompatActivity()
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        binding.SayfaGeriImageView.setOnClickListener {
 
-            val gerigit = Intent(this@MainActivity , SarkiListe::class.java)
-            startActivity(gerigit)
-
-        }
 
         binding.tekrarOynatImageView.setOnClickListener {
 
@@ -319,62 +305,12 @@ class MainActivity : AppCompatActivity()
         ContextCompat.startForegroundService(this, intent)
     }
 
-
-/*
-    private fun fetchTrackListAndStartService()
-    {
-        val call = postService.listPost()
-        var ali : Long ;
-
-        call.enqueue(object : Callback<DeezerResponse>
-        {
-            override fun onResponse(call: Call<DeezerResponse>, response: Response<DeezerResponse>)
-            {
-                if (response.isSuccessful)
-                {
-                    response.body()?.data?.let { tracks ->
-                        if (tracks.isNotEmpty())
-                        {
-                            postList.clear()
-                            postList.addAll(tracks)
-
-                            sayac = select?.id.let { id ->
-
-                               ali = id!!.toLong()
-
-
-                                postList.indexOfFirst { it.id == ali  }.takeIf { it != -1 } ?: 0
-
-
-                            } ?: 0
-
-
-                            startMusicService()
-                        }
-                        else
-                        {
-                            Toast.makeText(applicationContext, "Parça listesi boş", Toast.LENGTH_LONG).show()
-                        }
-                    }
-                } else {
-                    Toast.makeText(applicationContext, "Parça listesi çekilirken hata: ${response.message()}", Toast.LENGTH_LONG).show()
-                }
-            }
-
-            override fun onFailure(call: Call<DeezerResponse>, t: Throwable) {
-                Toast.makeText(applicationContext, "Parça listesi çekilirken ağ hatası: ${t.message}", Toast.LENGTH_LONG).show()
-            }
-        })
-    }
-
- */
-
     private fun startMusicService()
     {
         val serviceIntent = Intent(this, MusicService::class.java).apply {
-
             action = MusicService.ACTION_START
-            putExtra(MusicService.EXTRA_TRACK_LIST, postList as java.io.Serializable)
+
+            putParcelableArrayListExtra(MusicService.EXTRA_TRACK_LIST, ArrayList(postList))
             putExtra(MusicService.EXTRA_TRACK_INDEX, sayac)
         }
         ContextCompat.startForegroundService(this, serviceIntent)
@@ -429,7 +365,8 @@ class MainActivity : AppCompatActivity()
         }
     }
 
-    private fun resetHideTimer() {
+    private fun resetHideTimer()
+        {
         handler.removeCallbacks(hideRunnable)
         handler.postDelayed(hideRunnable, HIDE_DELAY_MS)
     }
