@@ -32,9 +32,20 @@ class SarkiListe : AppCompatActivity() {
         postService = ApiClient.getClient().create(DeezerApiService::class.java)
         adapter = ListAdapter(postList)
 
-        binding.backButton.setOnClickListener {
+        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
+        /*
+        binding.sayfaGeriImageView.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
+
+         */
 
         binding.playButton.setOnClickListener {
             togglePlayback()
@@ -46,7 +57,6 @@ class SarkiListe : AppCompatActivity() {
             fetchPlaylistTracks(playlistId)
         } else {
             Toast.makeText(this, "Çalma listesi ID'si bulunamadı.", Toast.LENGTH_LONG).show()
-            binding.emptyView.visibility = View.VISIBLE
         }
 
         //setData()
@@ -63,17 +73,17 @@ class SarkiListe : AppCompatActivity() {
         {
             currentPlayingSongIndex = 0
             startPlayback(currentPlayingSongIndex)
-            binding.playButton.setImageResource(R.drawable.durdur_asset)
+            binding.playButton.setImageResource(R.drawable.ic_pause)
         }
         else if (mediaPlayer?.isPlaying == true)
         {
             mediaPlayer?.pause()
-            binding.playButton.setImageResource(R.drawable.devam_asset)
+            binding.playButton.setImageResource(R.drawable.ic_play)
         }
         else
         {
             mediaPlayer?.start()
-            binding.playButton.setImageResource(R.drawable.durdur_asset)
+            binding.playButton.setImageResource(R.drawable.ic_pause)
         }
     }
 
@@ -90,6 +100,8 @@ class SarkiListe : AppCompatActivity() {
 
         val song = postList[index]
         val previewUrl = song.preview
+
+        binding.artistNameTextView.text = song.artist.name
 
         if (previewUrl.isNullOrEmpty()) {
             Toast.makeText(this, "${song.title} için önizleme URL'si bulunamadı.", Toast.LENGTH_SHORT).show()
@@ -230,15 +242,13 @@ class SarkiListe : AppCompatActivity() {
  */
 
     private fun fetchPlaylistTracks(playlistId: Long) {
-        binding.shimmerLayout.visibility = View.VISIBLE
-        binding.recyclerView.visibility = View.GONE
+
 
         // API'den playlist'in şarkılarını istiyoruz
         val call = postService.getPlaylistTracks(playlistId)
         call.enqueue(object : Callback<DeezerResponse> {
             override fun onResponse(call: Call<DeezerResponse>, response: Response<DeezerResponse>) {
-                binding.shimmerLayout.visibility = View.GONE
-                binding.recyclerView.visibility = View.VISIBLE
+
 
                 if (response.isSuccessful) {
                     response.body()?.data?.let { tracks ->
@@ -246,12 +256,11 @@ class SarkiListe : AppCompatActivity() {
                         postList.addAll(tracks)
                         adapter.notifyDataSetChanged()
 
-                        binding.emptyView.visibility = if (postList.isEmpty()) View.VISIBLE else View.GONE
 
                         if (postList.isNotEmpty()) {
                             binding.artistNameTextView.text = "Çalma Listesi Şarkıları"
                             Glide.with(this@SarkiListe).load(postList[0].album.cover_medium).into(binding.artistImageView)
-                            Glide.with(this@SarkiListe).load(postList[0].album.cover_medium).into(binding.headerBackground)
+                            Glide.with(this@SarkiListe).load(postList[0].album.cover_medium).into(binding.backgroundImage)
                         }
 
                     }
@@ -262,8 +271,6 @@ class SarkiListe : AppCompatActivity() {
 
             override fun onFailure(call: Call<DeezerResponse>, t: Throwable)
             {
-                binding.shimmerLayout.visibility = View.GONE
-                binding.recyclerView.visibility = View.VISIBLE
                 Toast.makeText(this@SarkiListe, "Ağ hatası: ${t.message}", Toast.LENGTH_LONG).show()
             }
         })
@@ -271,7 +278,7 @@ class SarkiListe : AppCompatActivity() {
 
     private fun setupAdapter()
     {
-        binding.recyclerView.apply {
+        binding.recyclerViewSongs.apply {
             layoutManager = LinearLayoutManager(this@SarkiListe)
             adapter = this@SarkiListe.adapter
         }

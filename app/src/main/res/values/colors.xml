@@ -26,4 +26,18 @@
 
     <color name="gradient_start">#1A1F29</color>
     <color name="gradient_end">#0C0F14</color>
+    <color name="mavi">#5271FF</color>
+    <color name="dark_blue_gradient_start">#1A1E2F</color>
+    <color name="light_blue_gradient_end">#2D325E</color>
+    <color name="accent_blue">#5271FF</color>
+
+
+    <color name="gradient_start_color">#151829</color>
+    <color name="gradient_end_color">#21264B</color>
+
+    <color name="item_background_dark">#1A1F29</color>
+    <color name="icon_color">#BBBBBB</color>
+
+
+
 </resources>

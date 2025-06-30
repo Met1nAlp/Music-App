@@ -47,6 +47,8 @@ dependencies {
 
     implementation("com.facebook.shimmer:shimmer:0.5.0")
 
+    implementation("androidx.cardview:cardview:1.0.0")
+
 
     implementation("androidx.media:media:1.7.0") // Medya bildirimleri için
     implementation("com.github.bumptech.glide:glide:4.16.0")

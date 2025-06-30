@@ -327,22 +327,24 @@ class MainActivity : AppCompatActivity()
             .load(track.album.cover_medium)
             .into(binding.gorselImageView)
 
+        /*
         Glide.with(this@MainActivity)
             .load(track.album.cover_medium)
             .into(binding.arkaplanGorselImageView)
 
+         */
 
 
         if (isPlaying)
         {
             binding.durOynatImageView.setImageDrawable(
-                ContextCompat.getDrawable(this, R.drawable.durdur_asset)
+                ContextCompat.getDrawable(this, R.drawable.ic_pause)
             )
         }
         else
         {
             binding.durOynatImageView.setImageDrawable(
-                ContextCompat.getDrawable(this, R.drawable.devam_asset)
+                ContextCompat.getDrawable(this, R.drawable.ic_play)
             )
         }
     }

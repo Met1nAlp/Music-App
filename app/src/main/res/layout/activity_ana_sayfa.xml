@@ -6,7 +6,7 @@
     android:id="@+id/anaSayfaLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient"
+    android:background="#121212"
     tools:context=".AnaSayfa">
 
     <LinearLayout
@@ -40,14 +40,20 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/sarkiListesiRecyclerView"
-        android:layout_width="0dp"
-        android:layout_height="240dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:clipToPadding="false"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:scrollbars="vertical"
+        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
+        app:spanCount="3"
         app:layout_constraintTop_toBottomOf="@id/baslikLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/liste_oge_sarki"
-        tools:itemCount="3" />
+        tools:listitem="@layout/liste_oge_sarki" />
 
     <TextView
         android:id="@+id/hizliAramaBaslik"
@@ -62,12 +68,11 @@
         app:layout_constraintTop_toBottomOf="@id/sarkiListesiRecyclerView"
         app:layout_constraintStart_toStartOf="parent" />
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/simdiOynatilanBar"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        android:background="#282828"
+        android:background="#1f1f1f"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -110,7 +115,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="David Guetta"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="#1DB954"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -118,12 +123,11 @@
             android:id="@+id/oynatButonu"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/durdur_asset"
+            android:src="@drawable/ic_pause"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@android:color/white" />
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

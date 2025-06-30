@@ -5,122 +5,172 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient"
+    android:background="@color/background_dark"
+    android:fitsSystemWindows="true"
     tools:context=".SarkiListe">
 
     <com.google.android.material.appbar.AppBarLayout
-    android:id="@+id/appBarLayout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:fitsSystemWindows="true"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-    <com.google.android.material.appbar.CollapsingToolbarLayout
-        android:id="@+id/collapsing_toolbar"
+        android:id="@+id/appbar"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
-        app:contentScrim="#1A1F29"
-        app:layout_scrollFlags="scroll|exitUntilCollapsed"
-        app:expandedTitleMarginStart="48dp"
-        app:expandedTitleMarginEnd="64dp">
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:background="@android:color/transparent"
+        app:expanded="true">
 
-        <ImageView
-            android:id="@+id/headerBackground"
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/musicapp"
-            app:layout_collapseMode="parallax"
-            android:alpha="0.5"/>
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            app:contentScrim="@color/background_dark"
+            app:layout_scrollFlags="scroll|snap"
+            app:titleEnabled="false">
+
+            <ImageView
+                android:id="@+id/backgroundImage"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:fitsSystemWindows="true"
+                android:scaleType="centerCrop"
+                app:layout_collapseMode="parallax"
+                android:contentDescription="Arka Plan Görseli"
+                tools:src="@tools:sample/backgrounds/scenic" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:background="#CC000000"
+                android:fitsSystemWindows="true"
+                app:layout_collapseMode="parallax"/>
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="?attr/actionBarSize"
+                android:paddingBottom="24dp">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/artist_image_cardView"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="8dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/artistImageView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="Sanatçı Görseli"
+                        android:scaleType="centerCrop"
+                        tools:srcCompat="@tools:sample/avatars" />
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:id="@+id/artist_label_textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Artist"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.042"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/artist_image_cardView" />
+
+                <TextView
+                    android:id="@+id/artistNameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="Mikey-kun"
+                    android:textAlignment="center"
+                    android:textColor="@color/text_primary"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.058"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/artist_label_textView" />
+
+                <LinearLayout
+                    android:id="@+id/weekly_listener_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/artistNameTextView">
+
+                </LinearLayout>
+
+
+                <ImageView
+                    android:id="@+id/playButton"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/play_button_background"
+                    android:contentDescription="Oynat"
+                    android:padding="16dp"
+                    android:src="@drawable/ic_play"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/artistNameTextView"
+                    app:tint="@color/white"
+                    android:layout_marginEnd="16dp" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="20dp"
-            app:layout_collapseMode="pin">
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp">
 
-
-            <ImageView
-                android:id="@+id/backButton"
+            <TextView
+                android:id="@+id/popular_songs_textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:src="@drawable/ileri_geri_asset"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Populer Songs"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/artistImageView"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_marginTop="32dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/musicapp"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewSongs"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:nestedScrollingEnabled="false"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.2"
-                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSizeRounded" />
-
-            <TextView
-                android:id="@+id/artistNameTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Barış Manço"
-                android:textColor="@android:color/white"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/artistImageView" />
-
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/playButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/devam_asset"
-                app:backgroundTint="#FFFFFF"
-                app:fabSize="normal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
+                app:layout_constraintTop_toBottomOf="@+id/popular_songs_textView"
+                tools:listitem="@layout/list_recyclerview" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-</com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingTop="16dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/list_recyclerview" />
-
-    <TextView
-        android:id="@+id/emptyView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Şarkı bulunamadı"
-        android:textSize="16sp"
-        android:textColor="@android:color/white"
-        android:visibility="gone"
-        app:layout_anchor="@id/recyclerView"
-        app:layout_anchorGravity="center" />
-
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmerLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:ignore="MissingClass">
-    </com.facebook.shimmer.ShimmerFrameLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

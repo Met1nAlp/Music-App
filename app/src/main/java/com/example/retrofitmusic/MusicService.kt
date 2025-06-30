@@ -275,7 +275,7 @@ class MusicService : Service() {
         val nextIntent = PendingIntent.getService(this, 3, Intent(this, MusicService::class.java).setAction(ACTION_NEXT), PendingIntent.FLAG_IMMUTABLE)
         val stopIntent = PendingIntent.getService(this, 4, Intent(this, MusicService::class.java).setAction(ACTION_STOP), PendingIntent.FLAG_IMMUTABLE)
 
-        val playPauseIcon = if (isPaused) R.drawable.devam_asset else R.drawable.durdur_asset
+        val playPauseIcon = if (isPaused) R.drawable.ic_pause else R.drawable.ic_play
         val playPauseText = if (isPaused) "Oynat" else "Duraklat"
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
@@ -283,9 +283,9 @@ class MusicService : Service() {
             .setContentText(currentTrack.artist.name)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(contentPendingIntent)
-            .addAction(R.drawable.ileri_geri_asset, "Önceki", prevIntent)
+            .addAction(R.drawable.ic_skip_previous, "Önceki", prevIntent)
             .addAction(playPauseIcon, playPauseText, playPauseIntent)
-            .addAction(R.drawable.ileri_asset, "Sonraki", nextIntent)
+            .addAction(R.drawable.ic_skip_next, "Sonraki", nextIntent)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setShowActionsInCompactView(0, 1, 2))
             .setOngoing(true)

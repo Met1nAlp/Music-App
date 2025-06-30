@@ -45,7 +45,7 @@ class ListAdapter(var list: List<Veriler>) : RecyclerView.Adapter<ListAdapter.Vi
                 .load(secilen.album.cover_medium)
                 .into(holder.binding.resimImageView)
 
-
+/*
             favoriteIcon.setOnClickListener {
 
                 secilen.isFavorite = !secilen.isFavorite
@@ -62,6 +62,8 @@ class ListAdapter(var list: List<Veriler>) : RecyclerView.Adapter<ListAdapter.Vi
                 }
 
             }
+
+ */
             root.setOnClickListener {
                 val intent = Intent(root.context, MainActivity::class.java)
                 intent.putExtra("song_list", ArrayList(list))

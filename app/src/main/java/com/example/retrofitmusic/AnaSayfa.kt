@@ -13,7 +13,9 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.retrofitmusic.databinding.ActivityAnaSayfaBinding
 import retrofit2.Call
@@ -57,8 +59,8 @@ class AnaSayfa : AppCompatActivity()
 
 
         binding.oynatButonu.setOnClickListener {
-            val resim = resources.getDrawable(R.drawable.devam_asset)
-            val resim2 = resources.getDrawable(R.drawable.durdur_asset)
+            val resim = resources.getDrawable(R.drawable.ic_play)
+            val resim2 = resources.getDrawable(R.drawable.ic_pause)
 
             val serviceIntent = Intent(this, MusicService::class.java).apply {
 
@@ -296,7 +298,7 @@ class AnaSayfa : AppCompatActivity()
     private fun setupAdapter()
     {
         binding.sarkiListesiRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@AnaSayfa)
+            layoutManager = GridLayoutManager(this@AnaSayfa, 3, GridLayoutManager.HORIZONTAL, false)
             adapter = musicadapter
         }
 
