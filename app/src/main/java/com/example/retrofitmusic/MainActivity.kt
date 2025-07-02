@@ -131,6 +131,11 @@ class MainActivity : AppCompatActivity()
             }
         }
 
+        binding.SayfaGeriImageView.setOnClickListener {
+
+            onBackPressedDispatcher.onBackPressed()
+        }
+
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
             {
@@ -259,7 +264,7 @@ class MainActivity : AppCompatActivity()
         sayac = intent.getIntExtra("song_index" , 0)
 
         if (receivedList != null && receivedList.isNotEmpty() ) {
-            postList.clear()
+            //postList.clear()
             postList.addAll(receivedList)
             updateUI(postList[sayac])
             startMusicService()
@@ -327,12 +332,6 @@ class MainActivity : AppCompatActivity()
             .load(track.album.cover_medium)
             .into(binding.gorselImageView)
 
-        /*
-        Glide.with(this@MainActivity)
-            .load(track.album.cover_medium)
-            .into(binding.arkaplanGorselImageView)
-
-         */
 
 
         if (isPlaying)

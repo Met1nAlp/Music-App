@@ -1,7 +1,9 @@
 package com.example.retrofitmusic
 
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -37,15 +39,19 @@ class SarkiListe : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
-
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        /*
-        binding.sayfaGeriImageView.setOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
+        toolbar.setNavigationOnClickListener {
+
+            val gerigit = Intent(this, AnaSayfa::class.java)
+            startActivity(gerigit)
         }
 
-         */
+
+        binding.toolbar.setOnClickListener {
+            val intent = Intent(this, AnaSayfa::class.java)
+            startActivity(intent)
+        }
 
         binding.playButton.setOnClickListener {
             togglePlayback()
@@ -59,7 +65,6 @@ class SarkiListe : AppCompatActivity() {
             Toast.makeText(this, "Çalma listesi ID'si bulunamadı.", Toast.LENGTH_LONG).show()
         }
 
-        //setData()
         setupAdapter()
     }
 
@@ -252,12 +257,13 @@ class SarkiListe : AppCompatActivity() {
 
                 if (response.isSuccessful) {
                     response.body()?.data?.let { tracks ->
-                        postList.clear()
+                        //postList.clear()
                         postList.addAll(tracks)
                         adapter.notifyDataSetChanged()
 
 
-                        if (postList.isNotEmpty()) {
+                        if (postList.isNotEmpty())
+                        {
                             binding.artistNameTextView.text = "Çalma Listesi Şarkıları"
                             Glide.with(this@SarkiListe).load(postList[0].album.cover_medium).into(binding.artistImageView)
                             Glide.with(this@SarkiListe).load(postList[0].album.cover_medium).into(binding.backgroundImage)

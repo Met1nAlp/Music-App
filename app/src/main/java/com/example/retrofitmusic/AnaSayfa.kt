@@ -250,7 +250,7 @@ class AnaSayfa : AppCompatActivity()
                 if (response.isSuccessful)
                 {
                     response.body()?.data?.let { chartTracks ->
-                        postList.clear()
+                        //postList.clear()
                         postList.addAll(chartTracks)
 
                         musicadapter.notifyDataSetChanged()
@@ -270,8 +270,7 @@ class AnaSayfa : AppCompatActivity()
         })
     }
 
-    private fun fetchPlaylistDetails()
-    {
+    private fun fetchPlaylistDetails() {
         val playlistId: Long = 908622995L
         val call = postService.getPlaylistDetails(playlistId)
 
@@ -279,22 +278,38 @@ class AnaSayfa : AppCompatActivity()
             override fun onResponse(call: Call<Playlist>, response: Response<Playlist>) {
                 if (response.isSuccessful) {
                     response.body()?.let { playlist ->
-                        albumList.clear()
-                        albumList.add(playlist)
+                        //albumList.clear()
+                        repeat(15) {
+                            albumList.add(playlist)
+                        }
                         albumadapter.notifyDataSetChanged()
                     } ?: run {
-                        Toast.makeText(this@AnaSayfa, "Çalma listesi verisi boş geldi.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@AnaSayfa,
+                            "Çalma listesi verisi boş geldi.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } else {
-                    Toast.makeText(this@AnaSayfa, "Çalma listesi alınamadı: ${response.message()}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this@AnaSayfa,
+                        "Çalma listesi alınamadı: ${response.message()}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
 
             override fun onFailure(call: Call<Playlist>, t: Throwable) {
-                Toast.makeText(this@AnaSayfa, "Ağ hatası (Çalma Listesi): ${t.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@AnaSayfa,
+                    "Ağ hatası (Çalma Listesi): ${t.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         })
     }
+
+
     private fun setupAdapter()
     {
         binding.sarkiListesiRecyclerView.apply {
@@ -303,7 +318,7 @@ class AnaSayfa : AppCompatActivity()
         }
 
         binding.albumIzgarasiRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@AnaSayfa, LinearLayoutManager.HORIZONTAL, false)
+            layoutManager = GridLayoutManager(this@AnaSayfa, 2, GridLayoutManager.VERTICAL, false)
             adapter = albumadapter
         }
     }

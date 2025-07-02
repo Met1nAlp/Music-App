@@ -14,7 +14,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:layout_marginTop="20dp"
         android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent"
@@ -25,48 +26,77 @@
             android:id="@+id/baslikIkonuImageView"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/musicapp"/>
+            android:src="@drawable/musicapp"
+            android:contentDescription="Uygulama İkonu" />
 
         <TextView
-            android:id="@+id/baslikTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Music Player"
-            android:textColor="@android:color/white"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginStart="12dp"/>
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/sarkiListesiRecyclerView"
+        android:id="@+id/baslikTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        android:clipToPadding="false"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:scrollbars="vertical"
-        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
-        app:spanCount="3"
-        app:layout_constraintTop_toBottomOf="@id/baslikLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/liste_oge_sarki" />
+        android:text="Music Player"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginStart="12dp"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/hizliAramaBaslik"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
         android:text="Hızlı arama"
         android:textColor="@android:color/white"
         android:textSize="22sp"
         android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/baslikLayout" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/sarkiListesiRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:scrollbars="none"
+        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/hizliAramaBaslik"
+        app:spanCount="3"
+        tools:listitem="@layout/liste_oge_sarki" />
+
+    <TextView
+        android:id="@+id/albumlerBaslik"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/sarkiListesiRecyclerView"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:text="Albümler"
+        android:textColor="@android:color/white"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sarkiListesiRecyclerView" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/albumIzgarasiRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@id/albumlerBaslik"
+        app:layout_constraintBottom_toTopOf="@id/simdiOynatilanBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/izgara_oge_album"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="2" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/simdiOynatilanBar"
@@ -75,9 +105,11 @@
         android:background="#1f1f1f"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
@@ -86,6 +118,7 @@
             android:layout_height="44dp"
             android:scaleType="centerCrop"
             android:src="@drawable/musicapp"
+            android:contentDescription="Şu an oynatılan şarkının albüm kapağı"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -124,27 +157,14 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@drawable/ic_pause"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="Oynat/Duraklat düğmesi"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless" app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@android:color/white" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/albumIzgarasiRecyclerView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintTop_toBottomOf="@id/hizliAramaBaslik"
-        app:layout_constraintBottom_toTopOf="@id/simdiOynatilanBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/izgara_oge_album"
-        tools:itemCount="6"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:spanCount="2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
