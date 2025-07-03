@@ -23,9 +23,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.example.retrofitmusic.databinding.ActivityMainBinding
-
-
-
+import android.graphics.drawable.Drawable
+import android.view.animation.Animation
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import com.example.retrofitmusic.databinding.ActivitySarkiListeBinding
 
 
 class MainActivity : AppCompatActivity()
@@ -33,6 +37,8 @@ class MainActivity : AppCompatActivity()
     private lateinit var binding: ActivityMainBinding
     private var postList: MutableList<Veriler> = mutableListOf()
     private lateinit var rotateAnimation : android.view.animation.Animation
+    private lateinit var fadeOutAnimation: Animation
+    private lateinit var fadeInAnimation: Animation
     private var sayac = 0
     private var terkrarSayaci = 1
     private var isPlaying = false
@@ -113,15 +119,24 @@ class MainActivity : AppCompatActivity()
         return sharedPreferences.getInt("lastVolume", defaultValue)
     }
 
+    private var initialX: Float = 0f
+    private val SWIPE_THRESHOLD = 100
+    private val SWIPE_VELOCITY_THRESHOLD = 100
+
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         rotateAnimation = AnimationUtils.loadAnimation(this@MainActivity , R.anim.rotate)
+
+        fadeOutAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_out)
+        fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
         {
@@ -247,6 +262,47 @@ class MainActivity : AppCompatActivity()
             false
         }
 
+
+        binding.gorselImageView.setOnTouchListener(object : View.OnTouchListener {
+
+            @SuppressLint("ClickableViewAccessibility")
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean
+            {
+                event?.let {
+                    when (it.action)
+                    {
+                        MotionEvent.ACTION_DOWN ->
+                            {
+                            initialX = it.x
+                            return true
+                        }
+                        MotionEvent.ACTION_UP ->
+                            {
+                            val finalX = it.x
+                            val deltaX = finalX - initialX
+
+                            if (Math.abs(deltaX) > SWIPE_THRESHOLD)
+                            {
+                                if (deltaX > 0)
+                                {
+                                    sendControlToService(MusicService.ACTION_PREVIOUS)
+                                    Toast.makeText(this@MainActivity, "Önceki şarkı", Toast.LENGTH_SHORT).show()
+                                }
+                                else
+                                {
+
+                                    sendControlToService(MusicService.ACTION_NEXT)
+                                    Toast.makeText(this@MainActivity, "Sonraki şarkı", Toast.LENGTH_SHORT).show()
+                                }
+                                return true
+                            }
+                        }
+                    }
+                }
+                return false
+            }
+        })
+
         var serviceIntent = Intent(this, BackgroundService::class.java)
         startService(serviceIntent)
 
@@ -321,18 +377,13 @@ class MainActivity : AppCompatActivity()
         ContextCompat.startForegroundService(this, serviceIntent)
     }
 
+
     private fun updateUI(track: Veriler)
     {
+
         binding.sarkiIsmiTextView.text = track.title
         binding.sanatciIsmiTextView.text = track.artist.name
-
         binding.seekBar.max = track.duration * 1000
-
-        Glide.with(this@MainActivity)
-            .load(track.album.cover_medium)
-            .into(binding.gorselImageView)
-
-
 
         if (isPlaying)
         {
@@ -345,6 +396,58 @@ class MainActivity : AppCompatActivity()
             binding.durOynatImageView.setImageDrawable(
                 ContextCompat.getDrawable(this, R.drawable.ic_play)
             )
+        }
+
+        val fadeOutListener = object : Animation.AnimationListener
+        {
+            override fun onAnimationStart(animation: Animation?) {}
+
+            override fun onAnimationEnd(animation: Animation?)
+            {
+                Glide.with(this@MainActivity)
+                    .load(track.album.cover_medium)
+                    .listener(object : RequestListener<Drawable>
+                    {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable?>,
+                            isFirstResource: Boolean
+                        ): Boolean
+                        {
+                            binding.gorselImageView.alpha = 1f
+                            return false
+                        }
+
+                        override fun onResourceReady(
+                            resource: Drawable,
+                            model: Any,
+                            target: Target<Drawable?>?,
+                            dataSource: DataSource,
+                            isFirstResource: Boolean
+                        ): Boolean
+                        {
+                            binding.gorselImageView.startAnimation(fadeInAnimation)
+                            return false
+                        }
+                    })
+                    .into(binding.gorselImageView)
+            }
+
+            override fun onAnimationRepeat(animation: Animation?) {}
+        }
+
+        fadeOutAnimation.setAnimationListener(fadeOutListener)
+
+        if (binding.gorselImageView.drawable != null)
+        {
+            binding.gorselImageView.startAnimation(fadeOutAnimation)
+        }
+        else
+        {
+
+            fadeOutAnimation.setAnimationListener(null)
+            fadeOutListener.onAnimationEnd(null)
         }
     }
 
@@ -376,6 +479,7 @@ class MainActivity : AppCompatActivity()
     {
         super.onStop()
         unregisterReceiver(serviceStateReceiver)
+        handler.removeCallbacks(hideRunnable)
     }
 
     override fun onDestroy()

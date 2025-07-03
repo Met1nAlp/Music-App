@@ -45,25 +45,7 @@ class ListAdapter(var list: List<Veriler>) : RecyclerView.Adapter<ListAdapter.Vi
                 .load(secilen.album.cover_medium)
                 .into(holder.binding.resimImageView)
 
-/*
-            favoriteIcon.setOnClickListener {
 
-                secilen.isFavorite = !secilen.isFavorite
-
-                if (secilen.isFavorite)
-                {
-                    holder.binding.favoriteIcon.setColorFilter(
-                        ContextCompat.getColor(favoriteIcon.context , R.color.favorite_color))
-                }
-                else
-                {
-                    holder.binding.favoriteIcon.setColorFilter(
-                        ContextCompat.getColor(favoriteIcon.context , R.color.black))
-                }
-
-            }
-
- */
             root.setOnClickListener {
                 val intent = Intent(root.context, MainActivity::class.java)
                 intent.putExtra("song_list", ArrayList(list))

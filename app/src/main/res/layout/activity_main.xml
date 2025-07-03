@@ -6,14 +6,13 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient"
+    android:background="@color/background_dark"
     tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/ikincil"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background_gradient"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -51,7 +50,7 @@
             android:layout_marginEnd="24dp"
             android:layout_marginTop="32dp"
             android:padding="12dp"
-            android:src="@drawable/ic_settings_dots"
+            android:src="@drawable/sesayarla_asset"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/text_primary" />
@@ -201,7 +200,7 @@
                 android:layout_height="48dp"
                 android:layout_marginStart="24dp"
                 android:padding="12dp"
-                android:src="@drawable/ic_shuffle"
+                android:src="@drawable/karistir"
                 app:tint="@color/text_secondary" />
         </LinearLayout>
 

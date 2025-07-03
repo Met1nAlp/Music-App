@@ -3,8 +3,6 @@ package com.example.retrofitmusic
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -20,8 +18,10 @@ class SarkiListe : AppCompatActivity() {
     private lateinit var binding: ActivitySarkiListeBinding
     private lateinit var adapter: ListAdapter
     private lateinit var postService: DeezerApiService
+    private var random = 0
+    private var oynatiliyor = false
+    private var track: Veriler? = null
     private val postList: MutableList<Veriler> = mutableListOf()
-
     private var mediaPlayer: MediaPlayer? = null
     private var currentPlayingSongIndex: Int = -1
 
@@ -48,48 +48,130 @@ class SarkiListe : AppCompatActivity() {
         }
 
 
+
+        binding.oynatButonu.setOnClickListener {
+
+            val dur = resources.getDrawable(R.drawable.ic_pause)
+            val devam = resources.getDrawable(R.drawable.ic_play)
+
+            if (oynatiliyor)
+            {
+                binding.oynatButonu.setImageDrawable(devam)
+                mediaPlayer?.pause()
+                oynatiliyor = false
+            }
+            else
+            {
+                togglePlayback(random)
+                binding.oynatButonu.setImageDrawable(dur)
+                oynatiliyor = true
+            }
+        }
+
         binding.toolbar.setOnClickListener {
             val intent = Intent(this, AnaSayfa::class.java)
             startActivity(intent)
         }
 
         binding.playButton.setOnClickListener {
-            togglePlayback()
+            togglePlayback(0)
         }
 
         val playlistId = intent.getLongExtra("playlist_id", -1L)
 
-        if (playlistId != -1L) {
+        if (playlistId != -1L)
+        {
             fetchPlaylistTracks(playlistId)
-        } else {
+        }
+        else
+        {
             Toast.makeText(this, "Çalma listesi ID'si bulunamadı.", Toast.LENGTH_LONG).show()
         }
 
         setupAdapter()
     }
 
-    private fun togglePlayback() {
-        if (postList.isEmpty()) {
-            Toast.makeText(this, "Oynatılacak şarkı yok.", Toast.LENGTH_SHORT).show()
-            return
-        }
+    private fun togglePlayback(sayi : Int)
+    {
+        if ( sayi != 0 )
+        {
+            if (postList.isEmpty())
+            {
+                Toast.makeText(this, "Oynatılacak şarkı yok.", Toast.LENGTH_SHORT).show()
+                return
+            }
 
-        if (mediaPlayer == null)
-        {
-            currentPlayingSongIndex = 0
-            startPlayback(currentPlayingSongIndex)
-            binding.playButton.setImageResource(R.drawable.ic_pause)
-        }
-        else if (mediaPlayer?.isPlaying == true)
-        {
-            mediaPlayer?.pause()
-            binding.playButton.setImageResource(R.drawable.ic_play)
+            if (mediaPlayer == null)
+            {
+
+                startPlayback(sayi)
+                binding.playButton.setImageResource(R.drawable.ic_pause)
+
+                binding.artistNameTextView.text = postList[sayi].album.title
+                Glide.with(this@SarkiListe).load(postList[sayi].album.cover_medium)
+                    .into(binding.artistImageView)
+                Glide.with(this@SarkiListe).load(postList[sayi].album.cover_medium)
+                    .into(binding.backgroundImage)
+
+                binding.simdiOynatilanSarkiAdi.text = postList[sayi].album.title
+                binding.simdiOynatilanSanatci.text = postList[sayi].artist.name
+                Glide.with(this@SarkiListe).load(postList[sayi].album.cover_medium)
+                    .into(binding.simdiOynatilanKapak)
+
+            }
+            else if (mediaPlayer?.isPlaying == true)
+            {
+                mediaPlayer?.pause()
+                binding.playButton.setImageResource(R.drawable.ic_play)
+            }
+            else
+            {
+                mediaPlayer?.start()
+                binding.playButton.setImageResource(R.drawable.ic_pause)
+            }
         }
         else
         {
-            mediaPlayer?.start()
-            binding.playButton.setImageResource(R.drawable.ic_pause)
+            if (postList.isEmpty())
+            {
+                Toast.makeText(this, "Oynatılacak şarkı yok.", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            if (mediaPlayer == null)
+            {
+                val rastgele = (0 until postList.size).random()
+
+                currentPlayingSongIndex = rastgele
+                startPlayback(currentPlayingSongIndex)
+                binding.playButton.setImageResource(R.drawable.ic_pause)
+
+                binding.artistNameTextView.text = postList[currentPlayingSongIndex].album.title
+                Glide.with(this@SarkiListe).load(postList[currentPlayingSongIndex].album.cover_medium)
+                    .into(binding.artistImageView)
+                Glide.with(this@SarkiListe).load(postList[currentPlayingSongIndex].album.cover_medium)
+                    .into(binding.backgroundImage)
+
+                binding.simdiOynatilanSarkiAdi.text = postList[currentPlayingSongIndex].album.title
+                binding.simdiOynatilanSanatci.text = postList[currentPlayingSongIndex].artist.name
+                Glide.with(this@SarkiListe).load(postList[currentPlayingSongIndex].album.cover_medium)
+                    .into(binding.simdiOynatilanKapak)
+
+            }
+            else if (mediaPlayer?.isPlaying == true)
+            {
+                mediaPlayer?.pause()
+                binding.playButton.setImageResource(R.drawable.ic_play)
+            }
+            else
+            {
+                mediaPlayer?.start()
+                binding.playButton.setImageResource(R.drawable.ic_pause)
+            }
+
         }
+
+
     }
 
     private fun startPlayback(index: Int)
@@ -163,130 +245,63 @@ class SarkiListe : AppCompatActivity() {
         mediaPlayer = null
     }
 
-/*
-    private fun setData() {
-        binding.shimmerLayout.visibility = View.VISIBLE
-        binding.recyclerView.visibility = View.GONE
-
-        val callChart = postService.listPost()
-        callChart.enqueue(object : Callback<DeezerResponse>
-        {
-            override fun onResponse(call: Call<DeezerResponse>, response: Response<DeezerResponse>)
-            {
-                if (response.isSuccessful)
-                {
-                    response.body()?.data?.let { chartTracks ->
-                        postList.clear()
-                        postList.addAll(chartTracks)
-                    }
-                }
-                else
-                {
-                    Toast.makeText(this@SarkiListe, "Liste alınamadı: ${response.message()}", Toast.LENGTH_LONG).show()
-                }
-
-                getAlbumData()
-            }
-
-            override fun onFailure(call: Call<DeezerResponse>, t: Throwable)
-            {
-                binding.shimmerLayout.visibility = View.GONE
-                binding.recyclerView.visibility = View.VISIBLE
-                Toast.makeText(this@SarkiListe, "Ağ hatası (Liste): ${t.message}", Toast.LENGTH_LONG).show()
-            }
-        })
-    }
 
 
-
-
-    private fun getAlbumData()
-    {
-        val callAlbum = postService.getAlbum(302127)
-        callAlbum.enqueue(object : Callback<AlbumResponse>
-        {
-            override fun onResponse(
-                call: Call<AlbumResponse>,
-                response: Response<AlbumResponse>
-            ) {
-                binding.shimmerLayout.visibility = View.GONE
-                binding.recyclerView.visibility = View.VISIBLE
-
-                if (response.isSuccessful)
-                {
-                    response.body()?.tracks?.data?.let { albumTracks ->
-                        postList.addAll(albumTracks)
-                    }
-                }
-                else
-                {
-                    Toast.makeText(
-                        this@SarkiListe,
-                        "Albüm alınamadı: ${response.message()}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-
-                binding.emptyView.visibility = if (postList.isEmpty()) View.VISIBLE else View.GONE
-                adapter.notifyDataSetChanged()
-            }
-
-            override fun onFailure(call: Call<AlbumResponse>, t: Throwable)
-            {
-                binding.shimmerLayout.visibility = View.GONE
-                binding.recyclerView.visibility = View.VISIBLE
-                Toast.makeText(
-                    this@SarkiListe,
-                    "Ağ hatası (Albüm): ${t.message}",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        })
-    }
-
- */
 
     private fun fetchPlaylistTracks(playlistId: Long) {
 
+        val playlist: Long = 908622995L
 
-        // API'den playlist'in şarkılarını istiyoruz
         val call = postService.getPlaylistTracks(playlistId)
         call.enqueue(object : Callback<DeezerResponse> {
-            override fun onResponse(call: Call<DeezerResponse>, response: Response<DeezerResponse>) {
-
-
+            override fun onResponse(
+                call: Call<DeezerResponse>,
+                response: Response<DeezerResponse>
+            ) {
                 if (response.isSuccessful) {
                     response.body()?.data?.let { tracks ->
-                        //postList.clear()
+                        postList.clear()
                         postList.addAll(tracks)
+
                         adapter.notifyDataSetChanged()
 
+                        random = (0 until postList.size).random()
 
-                        if (postList.isNotEmpty())
-                        {
-                            binding.artistNameTextView.text = "Çalma Listesi Şarkıları"
-                            Glide.with(this@SarkiListe).load(postList[0].album.cover_medium).into(binding.artistImageView)
-                            Glide.with(this@SarkiListe).load(postList[0].album.cover_medium).into(binding.backgroundImage)
+                        if (postList.isNotEmpty()) {
+                            binding.artistNameTextView.text = postList[random].album.title
+                            Glide.with(this@SarkiListe).load(postList[random].album.cover_medium)
+                                .into(binding.artistImageView)
+                            Glide.with(this@SarkiListe).load(postList[random].album.cover_medium)
+                                .into(binding.backgroundImage)
+
+
+                            binding.simdiOynatilanSarkiAdi.text = postList[random].album.title
+                            binding.simdiOynatilanSanatci.text = postList[random].artist.name
+                            Glide.with(this@SarkiListe).load(postList[random].album.cover_medium)
+                                .into(binding.simdiOynatilanKapak)
                         }
 
                     }
                 } else {
-                    Toast.makeText(this@SarkiListe, "Şarkılar alınamadı: ${response.message()}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this@SarkiListe,
+                        "Şarkılar alınamadı: ${response.message()}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
 
-            override fun onFailure(call: Call<DeezerResponse>, t: Throwable)
-            {
+            override fun onFailure(call: Call<DeezerResponse>, t: Throwable) {
                 Toast.makeText(this@SarkiListe, "Ağ hatası: ${t.message}", Toast.LENGTH_LONG).show()
             }
         })
     }
-
-    private fun setupAdapter()
-    {
-        binding.recyclerViewSongs.apply {
-            layoutManager = LinearLayoutManager(this@SarkiListe)
-            adapter = this@SarkiListe.adapter
+        private fun setupAdapter()
+        {
+            binding.recyclerViewSongs.apply {
+                layoutManager = LinearLayoutManager(this@SarkiListe)
+                adapter = this@SarkiListe.adapter
+            }
         }
-    }
+
 }

@@ -6,45 +6,46 @@
     android:id="@+id/anaSayfaLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
+    android:background="@color/background_dark"
     tools:context=".AnaSayfa">
 
     <LinearLayout
         android:id="@+id/baslikLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:layout_marginTop="20dp"
-        android:gravity="center_vertical"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/baslikIkonuImageView"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/musicapp"
-            android:contentDescription="Uygulama İkonu" />
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="Uygulama İkonu"
+            android:src="@drawable/musicapp" />
 
         <TextView
-        android:id="@+id/baslikTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Music Player"
-        android:textColor="@android:color/white"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginStart="12dp"/>
+            android:id="@+id/baslikTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Music Player"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/hizliAramaBaslik"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="36dp"
         android:layout_marginTop="24dp"
         android:text="Hızlı arama"
         android:textColor="@android:color/white"
@@ -53,29 +54,39 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/baslikLayout" />
 
+    <ImageView
+        android:id="@+id/secenek_imageView"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="72dp"
+        android:padding="12dp"
+        android:src="@drawable/yatay_asset"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.957"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/text_primary" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/sarkiListesiRecyclerView"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="250dp"
         android:layout_marginTop="12dp"
         android:clipToPadding="false"
-        android:orientation="horizontal"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:scrollbars="none"
-        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/hizliAramaBaslik"
-        app:spanCount="3"
         tools:listitem="@layout/liste_oge_sarki" />
 
     <TextView
         android:id="@+id/albumlerBaslik"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="20dp"
         android:text="Albümler"
         android:textColor="@android:color/white"
         android:textSize="22sp"
@@ -85,11 +96,12 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/albumIzgarasiRecyclerView"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:padding="16dp"
         app:layout_constraintTop_toBottomOf="@id/albumlerBaslik"
         app:layout_constraintBottom_toTopOf="@id/simdiOynatilanBar"
         app:layout_constraintStart_toStartOf="parent"
@@ -156,7 +168,7 @@
             android:id="@+id/oynatButonu"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/ic_pause"
+            android:src="@drawable/ic_play"
             android:contentDescription="Oynat/Duraklat düğmesi"
             android:clickable="true"
             android:focusable="true"

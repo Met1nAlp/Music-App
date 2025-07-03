@@ -29,6 +29,7 @@ class AnaSayfa : AppCompatActivity()
     private lateinit var musicadapter: AnaSayfaSarkiAdapter
     private lateinit var albumadapter: AnaSayfaAlbumAdapter
     private lateinit var postService: DeezerApiService
+    private var yatay = true
     private var isPlaying = false
     private var track: Veriler? = null
     private val postList: MutableList<Veriler> = mutableListOf()
@@ -87,6 +88,37 @@ class AnaSayfa : AppCompatActivity()
                 startService(serviceIntent)
             }
 
+        }
+
+        val ali = resources.getDrawable(R.drawable.yatay_asset)
+        val ayse = resources.getDrawable(R.drawable.dikey_asset)
+
+
+        binding.secenekImageView.setOnClickListener {
+            if (yatay)
+            {
+                binding.sarkiListesiRecyclerView.apply {
+
+                    layoutManager = LinearLayoutManager(this@AnaSayfa, LinearLayoutManager.VERTICAL, true)
+                    adapter = musicadapter
+
+                    binding.secenekImageView.setImageDrawable(ayse)
+
+                    yatay = false
+                }
+            }
+            else
+            {
+                binding.sarkiListesiRecyclerView.apply {
+
+                    layoutManager = GridLayoutManager(this@AnaSayfa, 3, GridLayoutManager.HORIZONTAL, false)
+                    adapter = musicadapter
+
+                    binding.secenekImageView.setImageDrawable(ali)
+
+                    yatay = true
+                }
+            }
         }
 
 
@@ -270,18 +302,24 @@ class AnaSayfa : AppCompatActivity()
         })
     }
 
-    private fun fetchPlaylistDetails() {
+    private fun fetchPlaylistDetails()
+    {
         val playlistId: Long = 908622995L
         val call = postService.getPlaylistDetails(playlistId)
 
-        call.enqueue(object : Callback<Playlist> {
-            override fun onResponse(call: Call<Playlist>, response: Response<Playlist>) {
+        call.enqueue(object : Callback<Playlist>
+        {
+            override fun onResponse(call: Call<Playlist>, response: Response<Playlist>)
+            {
                 if (response.isSuccessful) {
                     response.body()?.let { playlist ->
-                        //albumList.clear()
-                        repeat(15) {
+
+                        albumList.clear()
+                        repeat(15)
+                        {
                             albumList.add(playlist)
                         }
+
                         albumadapter.notifyDataSetChanged()
                     } ?: run {
                         Toast.makeText(
@@ -312,10 +350,15 @@ class AnaSayfa : AppCompatActivity()
 
     private fun setupAdapter()
     {
+
         binding.sarkiListesiRecyclerView.apply {
+
             layoutManager = GridLayoutManager(this@AnaSayfa, 3, GridLayoutManager.HORIZONTAL, false)
             adapter = musicadapter
+
+            yatay = true
         }
+
 
         binding.albumIzgarasiRecyclerView.apply {
             layoutManager = GridLayoutManager(this@AnaSayfa, 2, GridLayoutManager.VERTICAL, false)

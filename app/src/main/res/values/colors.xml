@@ -3,7 +3,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="background_dark">#1C2526</color> <!-- Koyu gri-mavi tema -->
+    <color name="background_dark">#010C1B</color> <!-- Koyu gri-mavi tema -->
     <color name="card_background">#2A363B</color> <!-- Satır arka planı -->
     <color name="accent_color2">#FF6F61</color>
     <color name="favorite_color">#FF1200</color>
@@ -33,7 +33,7 @@
 
 
     <color name="gradient_start_color">#151829</color>
-    <color name="gradient_end_color">#21264B</color>
+    <color name="gradient_end_color">#2B2D3B</color>
 
     <color name="item_background_dark">#1A1F29</color>
     <color name="icon_color">#BBBBBB</color>
