@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,6 +30,8 @@ class AnaSayfa : AppCompatActivity()
     private lateinit var musicadapter: AnaSayfaSarkiAdapter
     private lateinit var albumadapter: AnaSayfaAlbumAdapter
     private lateinit var postService: DeezerApiService
+    private lateinit var musicViewModel: MusicViewModel
+    private var yatay = true
     private var isPlaying = false
     private var track: Veriler? = null
     private val postList: MutableList<Veriler> = mutableListOf()
@@ -46,6 +49,8 @@ class AnaSayfa : AppCompatActivity()
 
         binding = ActivityAnaSayfaBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        musicViewModel = ViewModelProvider(this).get(MusicViewModel::class.java)
 
         track = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
         {
@@ -89,16 +94,83 @@ class AnaSayfa : AppCompatActivity()
 
         }
 
+        val ali = resources.getDrawable(R.drawable.yatay_asset)
+        val ayse = resources.getDrawable(R.drawable.dikey_asset)
+
+
+        binding.secenekImageView.setOnClickListener {
+            if (yatay)
+            {
+                binding.sarkiListesiRecyclerView.apply {
+
+                    layoutManager = LinearLayoutManager(this@AnaSayfa, LinearLayoutManager.VERTICAL, false)
+                    adapter = musicadapter
+
+                    binding.secenekImageView.setImageDrawable(ayse)
+
+                    yatay = false
+                }
+            }
+            else
+            {
+                binding.sarkiListesiRecyclerView.apply {
+
+                    layoutManager = GridLayoutManager(this@AnaSayfa, 3, GridLayoutManager.HORIZONTAL, false)
+                    adapter = musicadapter
+
+                    binding.secenekImageView.setImageDrawable(ali)
+
+                    yatay = true
+                }
+            }
+        }
+
 
         updateSimdiOynatilan(track)
 
-        postService = ApiClient.getClient().create(DeezerApiService::class.java)
+        //postService = ApiClient.getClient().create(DeezerApiService::class.java)
         musicadapter = AnaSayfaSarkiAdapter(postList)
         albumadapter = AnaSayfaAlbumAdapter(albumList)
 
-        fetchPlaylistDetails()
-        setData()
+        observeViewModelData()
+
+        //fetchPlaylistDetails()
+        //setData()
         setupAdapter()
+    }
+
+    private fun observeViewModelData()
+    {
+        musicViewModel.chartTracks.observe(this) { tracks ->
+
+            tracks?.let {
+
+                postList.clear()
+                postList.addAll(it)
+                musicadapter.notifyDataSetChanged()
+            } ?: run {
+                Toast.makeText(this, "Şarkı verisi boş geldi.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        val playlistId: Long = 908622995L
+
+        musicViewModel.getPlaylist(playlistId).observe(this) { playlist ->
+
+            playlist?.let {
+                albumList.clear()
+
+                repeat(15)
+                {
+                    albumList.add(playlist)
+                }
+                albumadapter.notifyDataSetChanged()
+            } ?: run {
+                Toast.makeText(this, "Çalma listesi verisi boş geldi.", Toast.LENGTH_SHORT).show()
+
+            }
+
+        }
     }
 
     private fun startPlayback(index: Int)
@@ -115,7 +187,8 @@ class AnaSayfa : AppCompatActivity()
         val song = postList[index]
         val previewUrl = song.preview
 
-        if (previewUrl.isNullOrEmpty()) {
+        if (previewUrl.isNullOrEmpty())
+        {
             Toast.makeText(this, "${song.title} için önizleme URL'si bulunamadı.", Toast.LENGTH_SHORT).show()
             return
         }
@@ -151,9 +224,6 @@ class AnaSayfa : AppCompatActivity()
 
         if (track != null)
         {
-            println("ali" + track?.title)
-            println("veli" + track?.artist?.name)
-
             binding.simdiOynatilanSarkiAdi.text = track.title
             binding.simdiOynatilanSanatci.text = track.artist.name
 
@@ -227,7 +297,8 @@ class AnaSayfa : AppCompatActivity()
         }
     }
 
-    override fun onStop() {
+    override fun onStop()
+    {
         super.onStop()
         unregisterReceiver(serviceStateReceiver)
     }
@@ -239,6 +310,7 @@ class AnaSayfa : AppCompatActivity()
         mediaPlayer = null
     }
 
+    /*
     private fun setData()
     {
 
@@ -250,7 +322,7 @@ class AnaSayfa : AppCompatActivity()
                 if (response.isSuccessful)
                 {
                     response.body()?.data?.let { chartTracks ->
-                        //postList.clear()
+                        postList.clear()
                         postList.addAll(chartTracks)
 
                         musicadapter.notifyDataSetChanged()
@@ -270,18 +342,25 @@ class AnaSayfa : AppCompatActivity()
         })
     }
 
-    private fun fetchPlaylistDetails() {
+
+    private fun fetchPlaylistDetails()
+    {
         val playlistId: Long = 908622995L
         val call = postService.getPlaylistDetails(playlistId)
 
-        call.enqueue(object : Callback<Playlist> {
-            override fun onResponse(call: Call<Playlist>, response: Response<Playlist>) {
+        call.enqueue(object : Callback<Playlist>
+        {
+            override fun onResponse(call: Call<Playlist>, response: Response<Playlist>)
+            {
                 if (response.isSuccessful) {
                     response.body()?.let { playlist ->
-                        //albumList.clear()
-                        repeat(15) {
+
+                        albumList.clear()
+                        repeat(15)
+                        {
                             albumList.add(playlist)
                         }
+
                         albumadapter.notifyDataSetChanged()
                     } ?: run {
                         Toast.makeText(
@@ -309,13 +388,19 @@ class AnaSayfa : AppCompatActivity()
         })
     }
 
+     */
 
     private fun setupAdapter()
     {
+
         binding.sarkiListesiRecyclerView.apply {
+
             layoutManager = GridLayoutManager(this@AnaSayfa, 3, GridLayoutManager.HORIZONTAL, false)
             adapter = musicadapter
+
+            yatay = true
         }
+
 
         binding.albumIzgarasiRecyclerView.apply {
             layoutManager = GridLayoutManager(this@AnaSayfa, 2, GridLayoutManager.VERTICAL, false)

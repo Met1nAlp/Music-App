@@ -2,6 +2,7 @@ package com.example.retrofitmusic
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -21,18 +22,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.bumptech.glide.Glide
+import androidx.viewpager2.widget.ViewPager2
 import com.example.retrofitmusic.databinding.ActivityMainBinding
-
-
-
-
 
 class MainActivity : AppCompatActivity()
 {
     private lateinit var binding: ActivityMainBinding
     private var postList: MutableList<Veriler> = mutableListOf()
-    private lateinit var rotateAnimation : android.view.animation.Animation
+    private lateinit var albumArtAdapter: AlbumArtAdapter
     private var sayac = 0
     private var terkrarSayaci = 1
     private var isPlaying = false
@@ -80,7 +77,13 @@ class MainActivity : AppCompatActivity()
                         intent.getSerializableExtra(MusicService.EXTRA_CURRENT_TRACK) as? Veriler
                     }
                     isPlaying = intent.getBooleanExtra(MusicService.EXTRA_IS_PLAYING, false)
-                    track?.let { updateUI(it) }
+                    track?.let {
+                        val newIndex = postList.indexOfFirst { song -> song.id == it.id }
+                        if (newIndex != -1) {
+                            sayac = newIndex
+                            updateUI(it)
+                        }
+                    }
                 }
                 MusicService.BROADCAST_PROGRESS_UPDATE ->
                 {
@@ -115,13 +118,11 @@ class MainActivity : AppCompatActivity()
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
-
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        rotateAnimation = AnimationUtils.loadAnimation(this@MainActivity , R.anim.rotate)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
         {
@@ -132,28 +133,23 @@ class MainActivity : AppCompatActivity()
         }
 
         binding.SayfaGeriImageView.setOnClickListener {
-
             onBackPressedDispatcher.onBackPressed()
         }
 
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
             {
-                if (fromUser) {
-                    val intent = Intent(this@MainActivity, MusicService::class.java)
+                if (fromUser)
+                {
+                    val intent = Intent()
                     intent.action = "com.example.retrofitmusic.SEEK"
                     intent.putExtra("position", progress)
                     ContextCompat.startForegroundService(this@MainActivity, intent)
                 }
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?)
-            {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?)
-            {
-            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
 
@@ -183,31 +179,23 @@ class MainActivity : AppCompatActivity()
                 }
                 else
                 {
+                    @Suppress("DEPRECATION")
                     vibrator.vibrate(50)
                 }
             }
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+
         })
 
 
-
         binding.tekrarOynatImageView.setOnClickListener {
-
             val intent = Intent(this, MusicService::class.java)
-
-            val resim = resources.getDrawable(R.drawable.fulltekrar_asset)
-            val resim2 = resources.getDrawable(R.drawable.tekraroynat_asset)
-
-            if (terkrarSayaci == 0 )
-            {
+            if (terkrarSayaci == 0 ) {
                 binding.tekrarOynatImageView.setColorFilter(resources.getColor(R.color.white))
                 intent.action = MusicService.ACTION_REPEAT
                 intent.putExtra("repeatmode", MusicService.RepeatMode.OFF.toString())
-
                 terkrarSayaci = 1
-            }
-            else if (terkrarSayaci == 1 )
-            {
+            } else if (terkrarSayaci == 1 ) {
                 binding.tekrarOynatImageView.setColorFilter(resources.getColor(R.color.accent_color))
                 intent.action = MusicService.ACTION_REPEAT
                 intent.putExtra("repeatmode", MusicService.RepeatMode.REPEAT_ONE.name)
@@ -217,9 +205,7 @@ class MainActivity : AppCompatActivity()
         }
 
         binding.karistirImageView.setOnClickListener {
-
             binding.karistirImageView.setColorFilter(resources.getColor(R.color.accent_color))
-
             val intent = Intent(this, MusicService::class.java)
             intent.action = MusicService.ACTION_TOGGLE_SHUFFLE
             startService(intent)
@@ -227,17 +213,15 @@ class MainActivity : AppCompatActivity()
         }
 
         binding.sesAyarlaImageView.setOnClickListener {
-
             binding.ikincil.visibility = View.INVISIBLE
             binding.kararsinLinearLayout.visibility = View.VISIBLE
-
             resetHideTimer()
         }
 
         binding.main.setOnTouchListener { v, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) {
+            if (event.action == MotionEvent.ACTION_DOWN)
+            {
                 resetHideTimer()
-
                 if (binding.kararsinLinearLayout.visibility == View.VISIBLE)
                 {
                     binding.kararsinLinearLayout.visibility = View.INVISIBLE
@@ -247,16 +231,49 @@ class MainActivity : AppCompatActivity()
             false
         }
 
-        var serviceIntent = Intent(this, BackgroundService::class.java)
-        startService(serviceIntent)
-
-        val receivedList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        binding.gorselViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback()
         {
+            private var userIsSwiping = false
 
+            override fun onPageScrollStateChanged(state: Int)
+            {
+                super.onPageScrollStateChanged(state)
+
+                if (state == ViewPager2.SCROLL_STATE_DRAGGING)
+                {
+                    userIsSwiping = true
+                }
+
+                if (state == ViewPager2.SCROLL_STATE_IDLE)
+                {
+                    userIsSwiping = false
+                }
+            }
+
+            override fun onPageSelected(position: Int)
+            {
+                super.onPageSelected(position)
+
+                if (userIsSwiping && position != sayac)
+                {
+                    if (position > sayac)
+                    {
+                        sendControlToService(MusicService.ACTION_NEXT)
+                    }
+                    else if (position < sayac)
+                    {
+                        sendControlToService(MusicService.ACTION_PREVIOUS)
+                    }
+
+                    sayac = position
+                }
+            }
+        })
+
+
+        val receivedList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableArrayListExtra("song_list", Veriler::class.java)
-        }
-        else
-        {
+        } else {
             @Suppress("DEPRECATION")
             intent.getSerializableExtra("song_list") as? ArrayList<Veriler>
         }
@@ -264,8 +281,48 @@ class MainActivity : AppCompatActivity()
         sayac = intent.getIntExtra("song_index" , 0)
 
         if (receivedList != null && receivedList.isNotEmpty() ) {
-            //postList.clear()
+            postList.clear()
             postList.addAll(receivedList)
+
+            albumArtAdapter = AlbumArtAdapter(postList)
+            binding.gorselViewPager.adapter = albumArtAdapter
+
+
+            binding.gorselViewPager.clipToPadding = false
+            binding.gorselViewPager.clipChildren = false
+
+            binding.gorselViewPager.offscreenPageLimit = 3
+
+            binding.gorselViewPager.setPageTransformer(CarouselPageTransformer())
+
+            val pageMarginPx = resources.getDimensionPixelOffset(R.dimen.page_margin)
+            val offsetPx = resources.getDimensionPixelOffset(R.dimen.offset)
+
+            binding.gorselViewPager.setPadding(offsetPx, 0, offsetPx, 0)
+
+            binding.gorselViewPager.layoutParams.apply {
+
+                width = resources.displayMetrics.widthPixels - (offsetPx * 2)
+            }
+
+            binding.gorselViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+
+                    if (position != sayac)
+                    {
+                        if (position > sayac)
+                        {
+                            sendControlToService(MusicService.ACTION_NEXT)
+                        }
+                        else
+                        {
+                            sendControlToService(MusicService.ACTION_PREVIOUS)
+                        }
+                    }
+                }
+            })
+
             updateUI(postList[sayac])
             startMusicService()
         }
@@ -289,13 +346,9 @@ class MainActivity : AppCompatActivity()
         }
 
         binding.durOynatImageView.setOnClickListener {
-
-            if (isPlaying)
-            {
+            if (isPlaying) {
                 sendControlToService(MusicService.ACTION_PAUSE)
-            }
-            else
-            {
+            } else {
                 sendControlToService(MusicService.ACTION_PLAY)
             }
         }
@@ -306,7 +359,6 @@ class MainActivity : AppCompatActivity()
         val intent = Intent(this, MusicService::class.java).apply {
             this.action = action
         }
-
         ContextCompat.startForegroundService(this, intent)
     }
 
@@ -314,25 +366,22 @@ class MainActivity : AppCompatActivity()
     {
         val serviceIntent = Intent(this, MusicService::class.java).apply {
             action = MusicService.ACTION_START
-
             putParcelableArrayListExtra(MusicService.EXTRA_TRACK_LIST, ArrayList(postList))
             putExtra(MusicService.EXTRA_TRACK_INDEX, sayac)
         }
         ContextCompat.startForegroundService(this, serviceIntent)
     }
 
-    private fun updateUI(track: Veriler)
-    {
+
+    private fun updateUI(track: Veriler) {
         binding.sarkiIsmiTextView.text = track.title
         binding.sanatciIsmiTextView.text = track.artist.name
-
         binding.seekBar.max = track.duration * 1000
 
-        Glide.with(this@MainActivity)
-            .load(track.album.cover_medium)
-            .into(binding.gorselImageView)
-
-
+        if (binding.gorselViewPager.currentItem != sayac)
+        {
+            binding.gorselViewPager.setCurrentItem(sayac, true)
+        }
 
         if (isPlaying)
         {
@@ -367,7 +416,7 @@ class MainActivity : AppCompatActivity()
     }
 
     private fun resetHideTimer()
-        {
+    {
         handler.removeCallbacks(hideRunnable)
         handler.postDelayed(hideRunnable, HIDE_DELAY_MS)
     }
@@ -376,10 +425,6 @@ class MainActivity : AppCompatActivity()
     {
         super.onStop()
         unregisterReceiver(serviceStateReceiver)
-    }
-
-    override fun onDestroy()
-    {
-        super.onDestroy()
+        handler.removeCallbacks(hideRunnable)
     }
 }

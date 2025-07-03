@@ -1,13 +1,11 @@
-// Veriler.kt
 package com.example.retrofitmusic
 
 import com.google.gson.annotations.SerializedName
-import android.os.Parcelable // Parcelable import edin
-import kotlinx.parcelize.Parcelize // @Parcelize import edin
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class Veriler
-    (
+data class Veriler(
     @SerializedName("id")
     val id: Long = 0,
     @SerializedName("title")
@@ -17,28 +15,25 @@ data class Veriler
     @SerializedName("preview")
     val preview: String = "",
     @SerializedName("artist")
-    val artist: Artist ,
+    val artist: Artist,
     @SerializedName("album")
-    val album: Album ,
+    val album: Album,
 
     var isFavorite: Boolean = false
 ) : Parcelable
 
 @Parcelize
-data class Artist
-    (
+data class Artist(
     @SerializedName("id")
     val id: Int = 0,
     @SerializedName("name")
-    val name: String = "" ,
-
+    val name: String = "",
     @SerializedName("cover_medium")
     val cover_medium: String? = null
 ) : Parcelable
 
 @Parcelize
-data class Album
-    (
+data class Album(
     @SerializedName("id")
     val id: Long = 0,
     @SerializedName("title")

@@ -75,6 +75,7 @@ class MusicService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action)
         {
+
             "com.example.retrofitmusic.SEEK" -> {
                 val position = intent.getIntExtra("position", 0)
                 mediaPlayer?.seekTo(position)
@@ -278,10 +279,12 @@ class MusicService : Service() {
         val playPauseIcon = if (isPaused) R.drawable.ic_pause else R.drawable.ic_play
         val playPauseText = if (isPaused) "Oynat" else "Duraklat"
 
+
+
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(currentTrack.title)
             .setContentText(currentTrack.artist.name)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.musicapp)
             .setContentIntent(contentPendingIntent)
             .addAction(R.drawable.ic_skip_previous, "Önceki", prevIntent)
             .addAction(playPauseIcon, playPauseText, playPauseIntent)

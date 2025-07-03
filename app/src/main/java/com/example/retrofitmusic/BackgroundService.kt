@@ -71,7 +71,7 @@ class BackgroundService : Service()
         val notification = NotificationCompat.Builder(this , CHANNEL_ID)
             .setContentTitle("Arkaplan Servisi")
             .setContentText("Uygulama arkaplanda çalışıyor")
-            .setSmallIcon(R.drawable.devam_asset)
+            .setSmallIcon(R.drawable.musicapp)
             .build()
 
         val notificationManager = getSystemService(android.app.NotificationManager::class.java)

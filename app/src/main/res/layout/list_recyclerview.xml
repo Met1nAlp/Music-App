@@ -1,66 +1,67 @@
-<androidx.cardview.widget.CardView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="4dp"
-    app:cardBackgroundColor="@color/item_background_dark">
+    app:cardElevation="4dp">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:background="?attr/selectableItemBackground">
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/gorsel_cardView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFC107"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:padding="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/resimImageView"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:contentDescription="Şarkı kapağı"
-            android:scaleType="centerCrop"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/gorsel_cardView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/resimImageView"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="Şarkı kapağı"
+                android:scaleType="centerCrop"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/SarkiismiTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:contentDescription="Şarkı başlığı"
+            android:text="Şarkı Adı"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/gorsel_cardView"
             app:layout_constraintTop_toTopOf="parent" />
 
-    </androidx.cardview.widget.CardView>
-    <TextView
-        android:id="@+id/SarkiismiTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Şarkı Adı"
-        android:textColor="@color/text_primary"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:contentDescription="Şarkı başlığı"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/gorsel_cardView"
-        android:layout_marginStart="16dp" />
-
-    <TextView
-        android:id="@+id/artistDurationTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Sanatçı • 3:30"
-        android:textColor="@color/text_secondary"
-        android:textSize="14sp"
-        android:contentDescription="Sanatçı ve süre"
-        app:layout_constraintTop_toBottomOf="@id/SarkiismiTextView"
-        app:layout_constraintStart_toEndOf="@id/gorsel_cardView"
-        android:layout_marginStart="16dp" />
+        <TextView
+            android:id="@+id/artistDurationTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:contentDescription="Sanatçı ve süre"
+            android:text="Sanatçı • 3:30"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            app:layout_constraintStart_toEndOf="@id/gorsel_cardView"
+            app:layout_constraintTop_toBottomOf="@id/SarkiismiTextView" />
 
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.cardview.widget.CardView>
