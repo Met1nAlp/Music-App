@@ -47,6 +47,9 @@ dependencies {
     implementation("com.facebook.shimmer:shimmer:0.5.0")
     implementation("androidx.cardview:cardview:1.0.0")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
     implementation("androidx.viewpager2:viewpager2:1.0.0")
 
     implementation("com.squareup.okhttp3:okhttp:4.9.0")

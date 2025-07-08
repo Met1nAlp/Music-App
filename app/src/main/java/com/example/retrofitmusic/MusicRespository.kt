@@ -1,3 +1,4 @@
+
 package com.example.retrofitmusic
 
 import androidx.lifecycle.LiveData
@@ -95,3 +96,43 @@ class MusicRepository
         return data
     }
 }
+
+
+
+/*
+
+import com.example.retrofitmusic.ApiClient
+import com.example.retrofitmusic.DeezerApiService
+import com.example.retrofitmusic.Playlist
+import com.example.retrofitmusic.Veriler
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.catch
+
+class MusicRepository {
+
+    private val deezerApiService: DeezerApiService = ApiClient.getClient().create(DeezerApiService::class.java)
+
+    fun getChartTracks(): Flow<List<Veriler>> = flow {
+        val response = deezerApiService.listPost()
+        emit(response.data)
+    }.catch { e ->
+        println("API BAŞARISIZ: ${e.message}")
+    }
+
+    fun getPlaylistDetails(playlistId: Long): Flow<Playlist> = flow {
+        val response = deezerApiService.getPlaylistDetails(playlistId)
+        emit(response)
+    }.catch { e ->
+        println("API BAŞARISIZ: ${e.message}")
+    }
+
+    fun getPlaylistTracks(playlistId: Long): Flow<List<Veriler>> = flow {
+        val response = deezerApiService.getPlaylistTracks(playlistId)
+        emit(response.data)
+    }.catch { e ->
+        println("API BAŞARISIZ: ${e.message}")
+    }
+}
+
+ */

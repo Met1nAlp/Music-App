@@ -141,9 +141,11 @@ class MainActivity : AppCompatActivity()
             {
                 if (fromUser)
                 {
-                    val intent = Intent()
-                    intent.action = "com.example.retrofitmusic.SEEK"
-                    intent.putExtra("position", progress)
+
+                    val intent = Intent(this@MainActivity, MusicService::class.java).apply {
+                        action = "com.example.retrofitmusic.SEEK"
+                        putExtra("position", progress)
+                    }
                     ContextCompat.startForegroundService(this@MainActivity, intent)
                 }
             }

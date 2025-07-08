@@ -76,9 +76,33 @@ class MusicService : Service() {
         when (intent?.action)
         {
 
-            "com.example.retrofitmusic.SEEK" -> {
+            "com.example.retrofitmusic.SEEK" ->
+            {
                 val position = intent.getIntExtra("position", 0)
-                mediaPlayer?.seekTo(position)
+
+                if (mediaPlayer != null)
+                {
+                    try {
+                        mediaPlayer?.seekTo(position)
+
+                        if (isPaused && mediaPlayer?.isPlaying == false)
+                        {
+                            mediaPlayer?.start()
+                            isPaused = false
+                            updateNotification()
+                            sendTrackUpdateBroadcast()
+                            startProgressBarUpdates()
+                        }
+                    } catch (e: IllegalStateException)
+                    {
+                        Log.e("MusicService", "SeekBar seekTo hatası (IllegalState): ${e.message}")
+                    }
+                }
+                else
+                {
+                    Log.w("MusicService", "MediaPlayer başlatılmadığı için seek işlemi yapılamadı.")
+                    Toast.makeText(this, "Müzik henüz hazır değil.", Toast.LENGTH_SHORT).show()
+                }
             }
             ACTION_START -> {
                 // Veriyi Parcelable olarak alın

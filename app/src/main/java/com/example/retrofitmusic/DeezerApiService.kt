@@ -9,6 +9,7 @@ import retrofit2.http.Url
 
 interface DeezerApiService
 {
+
     @GET("chart/0/tracks")
     fun listPost(): Call<DeezerResponse>
 
@@ -21,4 +22,17 @@ interface DeezerApiService
     @GET("playlist/{playlistId}")
     fun getPlaylistDetails(@Path("playlistId") playlistId: Long): Call<Playlist>
 
+/*
+
+    @GET("chart")
+    suspend fun listPost(): DeezerResponse
+
+    @GET("playlist/{id}")
+    suspend fun getPlaylistDetails(@Path("id") playlistId: Long): Playlist
+
+    @GET("playlist/{id}/tracks")
+    suspend fun getPlaylistTracks(@Path("id") playlistId: Long): DeezerResponse
+
+
+     */
 }

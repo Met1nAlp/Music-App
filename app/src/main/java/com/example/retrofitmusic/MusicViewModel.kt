@@ -1,7 +1,13 @@
 package com.example.retrofitmusic
 
+
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+
 
 class MusicViewModel : ViewModel()
 {
@@ -21,3 +27,17 @@ class MusicViewModel : ViewModel()
     }
 
 }
+
+
+/*
+class MusicViewModel(private val repository: MusicRepository) : ViewModel() {
+
+    val chartTracks = repository.getChartTracks()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    fun getPlaylistDetails(playlistId: Long): StateFlow<Playlist?> =
+        repository.getPlaylistDetails(playlistId)
+            .stateIn(viewModelScope, SharingStarted.Lazily, null)
+}
+
+ */
